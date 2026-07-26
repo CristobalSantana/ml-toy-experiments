@@ -35,8 +35,8 @@ DATA_DIR = Path(__file__).parent / "outputs"
 with open(DATA_DIR / "phase3_results.json") as f:
     PAYLOAD = json.load(f)
 
-SCIENCE_ML_ROOT = Path(__file__).resolve().parents[2]
-REFERENCE_NPZ = SCIENCE_ML_ROOT / "generators" / "diffusion_1d" / "outputs" / "diffusion_1d_solution.npz"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+REFERENCE_NPZ = REPO_ROOT / "generators" / "diffusion_1d" / "outputs" / "diffusion_1d_solution.npz"
 
 
 def curve_arrays(payload, arch, key):

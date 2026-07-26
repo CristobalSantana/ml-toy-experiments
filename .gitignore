@@ -13,3 +13,6 @@ checkpoints/
 
 # local-only social-media assets (e.g. Substack) -- kept on disk, never pushed
 **/socials/
+
+# public datasets: never commit raw downloads (fetch on demand via load.py)
+datasets/**/raw/

@@ -33,8 +33,8 @@ import torch
 import yaml
 
 EXPERIMENT_ROOT = Path(__file__).resolve().parent
-SCIENCE_ML_ROOT = EXPERIMENT_ROOT.parents[1]
-sys.path.insert(0, str(SCIENCE_ML_ROOT))
+REPO_ROOT = EXPERIMENT_ROOT.parents[1]
+sys.path.insert(0, str(REPO_ROOT))
 
 from generators.diffusion_1d.generate import DiffusionParams  # noqa: E402
 from models.kan.kan import KAN  # noqa: E402
@@ -43,7 +43,7 @@ from models.mlp.mlp import MLP  # noqa: E402
 OUTPUT_DIR = EXPERIMENT_ROOT / "outputs"
 CHECKPOINT_DIR = EXPERIMENT_ROOT / "checkpoints"
 MANIM_DATA_DIR = OUTPUT_DIR / "manim_data"
-REFERENCE_NPZ = SCIENCE_ML_ROOT / "generators" / "diffusion_1d" / "outputs" / "diffusion_1d_solution.npz"
+REFERENCE_NPZ = REPO_ROOT / "generators" / "diffusion_1d" / "outputs" / "diffusion_1d_solution.npz"
 
 N_FRAMES = 90
 

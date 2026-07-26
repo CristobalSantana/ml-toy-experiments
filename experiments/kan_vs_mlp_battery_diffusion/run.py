@@ -33,8 +33,8 @@ import yaml
 import matplotlib.pyplot as plt
 
 EXPERIMENT_ROOT = Path(__file__).resolve().parent
-SCIENCE_ML_ROOT = EXPERIMENT_ROOT.parents[1]
-sys.path.insert(0, str(SCIENCE_ML_ROOT))
+REPO_ROOT = EXPERIMENT_ROOT.parents[1]
+sys.path.insert(0, str(REPO_ROOT))
 
 from generators.diffusion_1d.generate import (  # noqa: E402
     DiffusionParams, solve_diffusion_1d, save_solution, plot_solution, check_mass_balance,
@@ -46,7 +46,7 @@ from experiments.kan_vs_mlp_battery_diffusion.pinn import (  # noqa: E402
 )
 
 CONFIG_PATH = EXPERIMENT_ROOT / "config.yaml"
-GENERATOR_OUTPUT_DIR = SCIENCE_ML_ROOT / "generators" / "diffusion_1d" / "outputs"
+GENERATOR_OUTPUT_DIR = REPO_ROOT / "generators" / "diffusion_1d" / "outputs"
 OUTPUT_DIR = EXPERIMENT_ROOT / "outputs"
 CHECKPOINT_DIR = EXPERIMENT_ROOT / "checkpoints"
 
