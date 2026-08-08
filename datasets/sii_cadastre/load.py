@@ -25,6 +25,7 @@ import argparse
 import hashlib
 import io
 import json
+import re
 import sys
 import urllib.request
 import zipfile
@@ -193,6 +194,22 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def _detect_cycle(raw_files: list[Path]) -> str:
+    """Read the reavalúo cycle straight off the SII filenames, which encode it
+    as BRTMPCATAS_<year>_<period>_<comuna>.zip - so provenance records the
+    actual cycle of the files on disk rather than a hand-typed guess."""
+    cycles = set()
+    for p in raw_files:
+        m = re.search(r"BRTMPCATAS_(\d{4})_(\d+)_", p.name.upper())
+        if m:
+            cycles.add(f"{m.group(1)}-{m.group(2)}")
+    if not cycles:
+        return "unknown (filenames did not encode a cycle)"
+    label = ", ".join(sorted(cycles))
+    warn = "" if len(cycles) == 1 else "  WARNING: comunas span different cycles!"
+    return f"non-agrícola, SII cycle {label} (from filenames){warn}"
+
+
 def build(uf_override: float | None) -> None:
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     retrieval = date.today()
@@ -226,7 +243,7 @@ def build(uf_override: float | None) -> None:
     manifest = {
         "dataset": "sii_cadastre",
         "retrieval_date": retrieval.isoformat(),
-        "reavaluo_cycle": "non-agrícola, 2026 cycle in process (confirm on the SII portal at download time)",
+        "reavaluo_cycle": _detect_cycle(raw_files),
         "source": "SII Sitio de Transparencia -> Detalle Catastral y ROL de cobro (manual, login-gated)",
         "uf_value_used": uf_value, "uf_source": uf_source,
         "comunas": COMUNAS,
@@ -236,7 +253,7 @@ def build(uf_override: float | None) -> None:
                       for p in raw_files},
         "generated_at": datetime.now().isoformat(timespec="seconds"),
     }
-    MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False))
+    MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"Wrote {out} ({len(res)} residential rols) and {MANIFEST.name}")
 
 

@@ -1,0 +1,55 @@
+{
+  "dataset": "sii_cadastre",
+  "retrieval_date": "2026-08-08",
+  "reavaluo_cycle": "non-agrícola, SII cycle 2026-1 (from filenames)",
+  "source": "SII Sitio de Transparencia -> Detalle Catastral y ROL de cobro (manual, login-gated)",
+  "uf_value_used": 40844.79,
+  "uf_source": "mindicador.cl (https://mindicador.cl/api/uf/08-08-2026)",
+  "comunas": {
+    "15108": "Las Condes",
+    "15103": "Providencia",
+    "15105": "Nunoa",
+    "15151": "Macul",
+    "15128": "La Florida",
+    "14109": "Maipu",
+    "16301": "Puente Alto",
+    "16165": "El Bosque"
+  },
+  "n_rows_residential": 905709,
+  "n_rows_all_roles": 1540452,
+  "raw_files": {
+    "raw\\14109\\BRTMPCATAS_2026_1_14109.zip": {
+      "sha256": "77668f762bcac5c8c86ee452f3418f62149d938e71a3aceb11fe4e7de2b3fc9d",
+      "bytes": 3218130
+    },
+    "raw\\15103\\BRTMPCATAS_2026_1_15103.zip": {
+      "sha256": "d29a1bffd22a983a8901f11402d6b720b14f413c98a7ef2a170909c59592fdab",
+      "bytes": 3743999
+    },
+    "raw\\15105\\BRTMPCATAS_2026_1_15105.zip": {
+      "sha256": "4b1df3184d9fb6ceda54b11301b842478ce9076146896e27d39f8ae2e8587735",
+      "bytes": 4146608
+    },
+    "raw\\15108\\BRTMPCATAS_2026_1_15108.zip": {
+      "sha256": "511979d5493d7eeb0ee4378ba80a4a352343228b3b4c02d681c62a80b6d61ea3",
+      "bytes": 6602144
+    },
+    "raw\\15128\\BRTMPCATAS_2026_1_15128.zip": {
+      "sha256": "c8befec55bcddedc35d8e81f23d7a5390394a571bdfd6e08fbc3d2ccf052ff1c",
+      "bytes": 3509253
+    },
+    "raw\\15151\\BRTMPCATAS_2026_1_15151.zip": {
+      "sha256": "951ec9da77c986a949776d7288408cb83d0faf231ca7b2679983364d90631023",
+      "bytes": 1369509
+    },
+    "raw\\16165\\BRTMPCATAS_2026_1_16165.zip": {
+      "sha256": "5b67ab27b7e1b9cfbd923256c9e5ae03b4227f6daefd40e01dd2ce24b5679c85",
+      "bytes": 979750
+    },
+    "raw\\16301\\BRTMPCATAS_2026_1_16301.zip": {
+      "sha256": "35c1ddcca82d26d4969e2d420e67095cb7c48c14ec5c09dfcd7f304c41f03b62",
+      "bytes": 3382242
+    }
+  },
+  "generated_at": "2026-08-08T13:51:30"
+}

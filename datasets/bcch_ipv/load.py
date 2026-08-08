@@ -69,11 +69,52 @@ def _parse_quarter(text: str):
     return pd.Timestamp(int(year), (q - 1) * 3 + 1, 1)  # first month of the quarter
 
 
+def _assert_is_price_index(path: Path, sheets: dict[str, pd.DataFrame]) -> None:
+    """Guard against downloading the wrong BDE cuadro.
+
+    The BDE's Vivienda section also carries "Indicadores de ventas efectivas de
+    viviendas" (series F034.CVV.* - a *transaction-volume* index) which is easy
+    to grab by mistake: it is quarterly, dwelling-type split, and looks like the
+    IPV at a glance. It measures how many homes sold, not at what price, so it
+    cannot serve as this experiment's temporal target. Fail loudly rather than
+    silently modelling the wrong quantity.
+    """
+    blob = " ".join(
+        str(v) for df in sheets.values()
+        for v in df.head(30).astype(str).to_numpy().ravel()
+    ).lower()
+    # normalize the latin-1 mojibake the BDE export produces (índice -> �ndice)
+    blob = blob.replace("�", "").replace("í", "i").replace("é", "e").replace("á", "a")
+
+    wrong_markers = ["ventas efectivas", ".cvv.", "operaciones de compraventa"]
+    hit = next((m for m in wrong_markers if m in blob), None)
+    if hit:
+        sys.exit(
+            f"ABORT: {path.name} is NOT the IPV.\n"
+            f"  Found marker: '{hit}'\n"
+            f"  This looks like 'Indicadores de ventas efectivas de viviendas' (series\n"
+            f"  F034.CVV.*), which is a TRANSACTION-VOLUME index (how many homes were\n"
+            f"  sold), not a PRICE index.\n"
+            f"  Re-download the cuadro 'Indice de precios de vivienda (IPV)' from the BDE\n"
+            f"  (Estadisticas experimentales chapter). See README.md."
+        )
+
+    price_markers = ["precios de vivienda", "precio de vivienda", "ipv"]
+    if not any(m in blob for m in price_markers):
+        sys.exit(
+            f"ABORT: {path.name} does not look like a housing PRICE index - none of\n"
+            f"  {price_markers} appear in its header/metadata sheets.\n"
+            f"  Run `python load.py --inspect` and confirm you exported the IPV cuadro."
+        )
+
+
 def build() -> None:
     files = _raw_files()
     if not files:
         sys.exit(f"No Excel files in {RAW_DIR} - download the IPV cuadro first (see README).")
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    for path in files:
+        _assert_is_price_index(path, _read_all_sheets(path))
 
     tidy_frames = []
     for path in files:
@@ -148,7 +189,7 @@ def _write_manifest(files: list[Path], tidy: pd.DataFrame) -> None:
         "raw_files": {p.name: {"sha256": _sha256(p), "bytes": p.stat().st_size} for p in files},
         "generated_at": datetime.now().isoformat(timespec="seconds"),
     }
-    MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False))
+    MANIFEST.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 def validate() -> None:
