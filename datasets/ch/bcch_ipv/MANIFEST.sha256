@@ -3,15 +3,23 @@
   "retrieval_date": "2026-08-08",
   "source": "Banco Central de Chile - Base de Datos Estadísticos (BDE), IPV cuadro (manual export)",
   "publication_lag_days": 120,
-  "n_obs": 97,
-  "n_series": 1,
+  "n_obs": 868,
+  "n_series": 17,
   "quarter_min": "2002-01-01",
   "quarter_max": "2026-01-01",
   "raw_files": {
     "ipv_bcch.xlsx": {
       "sha256": "cdb29a408a3eec143e56ade866c813a7e2898644a14554b75935c2eeaf75e549",
       "bytes": 7298
+    },
+    "IS_GENERAL_PROPIEDAD_08.xlsx": {
+      "sha256": "0cddce812981e3afa301e64a42b655a6cd5387e8b9ffc2b626c08f792fdec0ed",
+      "bytes": 10485
+    },
+    "IS_PRECIOS_GEO_2008.xlsx": {
+      "sha256": "5ab8f1d49660a0c9cb7719fb27b4473f1c1b091fb52f72e21f2985e6b198bb95",
+      "bytes": 8828
     }
   },
-  "generated_at": "2026-08-08T14:14:53"
+  "generated_at": "2026-08-08T16:44:43"
 }

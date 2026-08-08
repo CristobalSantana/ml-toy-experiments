@@ -1,4 +1,4 @@
-# datasets/bcch_ipv - Banco Central IPV (Índice de Precios de Vivienda)
+# datasets/ch/bcch_ipv - Banco Central IPV (Índice de Precios de Vivienda)
 
 Chile's quarterly Housing Price Index from the Banco Central de Chile (BCCh),
 the source for Experiment 02's **temporal / drift arm**. The IPV is built from
@@ -22,7 +22,7 @@ instead - no credentials to manage.
 4. Export to **Excel** and save it under `raw/`:
 
 ```
-datasets/bcch_ipv/raw/
+datasets/ch/bcch_ipv/raw/
     ipv_bcch.xlsx        (or whatever the BDE names it - the loader globs *.xls*)
 ```
 

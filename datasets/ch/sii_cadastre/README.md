@@ -1,4 +1,4 @@
-# datasets/sii_cadastre - SII "Detalle Catastral" (assessed fiscal value)
+# datasets/ch/sii_cadastre - SII "Detalle Catastral" (assessed fiscal value)
 
 Per-`rol` cadastral records from Chile's Servicio de Impuestos Internos (SII):
 the **avalúo fiscal** (assessed fiscal value) of each property, plus its
@@ -47,7 +47,7 @@ detail for each comuna below (SII comuna codes confirmed from the official
 Place the downloaded files under `raw/`, one folder per comuna code:
 
 ```
-datasets/sii_cadastre/raw/
+datasets/ch/sii_cadastre/raw/
     15108/   (Las Condes: the pipe-delimited detalle catastral files)
     15103/   (Providencia)
     ...

@@ -16,15 +16,17 @@ complete enough to trust.
 
 ```
 generators/   synthetic data generators (from a known equation)
-datasets/     public / real-world datasets (loader + provenance)
+datasets/     public / real-world datasets, grouped by country
 models/       model & architecture implementations, one per folder
 experiments/  each experiment combines a data source + one or more models
 ```
 
 - **`generators/<name>/`** - `generate.py`, a `README.md` explaining the
   equation and its meaning, and an `outputs/` folder with the reference data.
-- **`datasets/<name>/`** - a loader plus a `README.md` documenting the
-  source, license, and provenance of the public data.
+- **`datasets/<country>/<name>/`** - a loader plus a `README.md` documenting
+  the source, license, and provenance of the public data. Grouped by ISO
+  country code (`ch`, ...), since public data is national: its source, units
+  and administrative concepts only make sense within one country's system.
 - **`models/<name>/`** - the implementation and a short `README.md`.
 - **`experiments/<name>/`** - `run.py` (single entry point, runnable end to
   end), `config.yaml` (every reproducible parameter - constants, seeds,
@@ -49,11 +51,12 @@ equation, so every experiment has an exact ground truth to measure against.
 | [`diffusion_1d`](generators/diffusion_1d/) | 1D diffusion / heat equation, framed as lithium-ion battery charging |
 
 **Public** ([`datasets/`](datasets/)) - real, openly available datasets,
-each documented with its source and license.
+grouped by country and each documented with its source and license.
 
-| Dataset | Source |
-|---|---|
-| _(none yet)_ | |
+| Country | Dataset | Source |
+|---|---|---|
+| 🇨🇱 `ch` | [`sii_cadastre`](datasets/ch/sii_cadastre/) | SII - assessed fiscal value (avalúo fiscal) per property |
+| 🇨🇱 `ch` | [`bcch_ipv`](datasets/ch/bcch_ipv/) | Banco Central de Chile - quarterly housing price index (IPV) |
 
 ## Models
 

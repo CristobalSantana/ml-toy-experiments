@@ -141,11 +141,19 @@ def _tidy_sheet(df: pd.DataFrame, min_quarters: int = 8) -> pd.DataFrame | None:
         body = df.loc[[i for i in df.index if i > header_row]]
         if body.empty:
             return None
-        # series name = first non-empty label cell on the row (fallback: row index)
-        names = (body[labcols].astype(str).replace({"nan": ""}).apply(
-                    lambda r: next((v.strip() for v in r if v.strip()), ""), axis=1)
+        # Series name from the label cells. BDE cuadros often lead with a "Reg"
+        # hierarchy-numbering column ("1.", "1.1.", "1.1.2.") before the real
+        # "Descripción series" column, so skip pure-numbering tokens and keep
+        # the descriptive text; fall back to the numbering only if that is all
+        # there is.
+        def _name(row) -> str:
+            cells = [str(v).strip() for v in row if str(v).strip() and str(v).strip().lower() != "nan"]
+            descriptive = [c for c in cells if not re.fullmatch(r"[\d.]+", c)]
+            return " ".join(descriptive) if descriptive else (" ".join(cells) if cells else "")
+
+        names = (body[labcols].apply(_name, axis=1)
                  if labcols else pd.Series("", index=body.index))
-        names = names.mask(names.eq(""), body.index.map(lambda i: f"row{i}"))
+        names = names.mask(names.eq(""), pd.Series(body.index, index=body.index).map(lambda i: f"row{i}"))
         out = pd.DataFrame(
             body[qcols].apply(pd.to_numeric, errors="coerce").to_numpy(),
             index=pd.Index(names, name="series_col"),
