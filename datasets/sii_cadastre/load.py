@@ -23,9 +23,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 import sys
 import urllib.request
+import zipfile
 from datetime import date, datetime
 from pathlib import Path
 
@@ -64,25 +66,40 @@ def _to_num(series: pd.Series) -> pd.Series:
     return pd.to_numeric(s, errors="coerce")
 
 
-def _classify(path: Path) -> str | None:
-    """Return 'constr', 'roles', or None (skip) from a filename.
-    'CATASNL' = non-agrícola construction lines; 'CATASN' (not NL) = non-agrícola
-    roles; agrícola files ('CATASA'/'CATASAL') are skipped."""
-    name = path.name.upper()
-    if "CATASAL" in name or "CATASA" in name and "CATASN" not in name:
-        return None                       # agrícola -> skip
-    if "CATASNL" in name or name.endswith("NL.TXT") or "_NL" in name:
+def _classify(name: str) -> str | None:
+    """Classify a member filename: 'CATASNL' = non-agrícola construction lines,
+    'CATASN' (not NL) = non-agrícola roles, everything else (agrícola CATASA/
+    CATASAL, or the .zip itself) -> None (skip). Order matters: NL first."""
+    n = name.upper()
+    if "CATASNL" in n:
         return "constr"
-    if "CATASN" in name or "ROLES" in name:
+    if "CATASN" in n:
         return "roles"
     return None
 
 
-def _read_pipe(path: Path, ncols_min: int) -> pd.DataFrame:
-    df = pd.read_csv(path, sep="|", header=None, dtype=str,
+def _iter_member_files(folder: Path):
+    """Yield (name, bytes) for candidate data files in a comuna folder,
+    transparently reading from a per-comuna .zip if present (the SII download
+    ships one ZIP with the 4 detalle-catastral files), else loose files."""
+    zips = [p for p in folder.iterdir() if p.suffix.lower() == ".zip"]
+    if zips:
+        for zp in zips:
+            with zipfile.ZipFile(zp) as z:
+                for info in z.infolist():
+                    if not info.is_dir() and info.file_size > 0:
+                        yield info.filename, z.read(info.filename)
+    else:
+        for p in folder.iterdir():
+            if p.is_file() and p.suffix.lower() != ".zip":
+                yield p.name, p.read_bytes()
+
+
+def _read_pipe(data: bytes, name: str, ncols_min: int) -> pd.DataFrame:
+    df = pd.read_csv(io.BytesIO(data), sep="|", header=None, dtype=str,
                      encoding="latin-1", engine="python", on_bad_lines="skip")
     if df.shape[1] < ncols_min:
-        sys.exit(f"ABORT: {path} has {df.shape[1]} columns, expected >= {ncols_min}. "
+        sys.exit(f"ABORT: {name} has {df.shape[1]} columns, expected >= {ncols_min}. "
                  f"File format may differ from the documented spec - inspect it.")
     return df
 
@@ -92,16 +109,20 @@ def _load_comuna(code: str) -> pd.DataFrame:
     if not folder.is_dir():
         sys.exit(f"ABORT: missing raw folder for comuna {code} ({COMUNAS[code]}): {folder}\n"
                  f"Download its Detalle Catastral and place the files there (see README).")
-    files = [p for p in folder.iterdir() if p.is_file()]
-    roles_files = [p for p in files if _classify(p) == "roles"]
-    constr_files = [p for p in files if _classify(p) == "constr"]
-    if not roles_files or not constr_files:
-        sys.exit(f"ABORT: comuna {code}: found roles={[p.name for p in roles_files]}, "
-                 f"constr={[p.name for p in constr_files]}. Need one of each "
-                 f"(non-agrícola). Rename/inspect the raw files if the auto-detect missed them.")
+    roles_parts, constr_parts = [], []
+    for name, data in _iter_member_files(folder):
+        kind = _classify(name)
+        if kind == "roles":
+            roles_parts.append(_read_pipe(data, name, 15))
+        elif kind == "constr":
+            constr_parts.append(_read_pipe(data, name, 11))
+    if not roles_parts or not constr_parts:
+        sys.exit(f"ABORT: comuna {code}: could not find both non-agrícola files "
+                 f"(roles={len(roles_parts)}, constr={len(constr_parts)}). "
+                 f"Expected BRTMPCATASN_* and BRTMPCATASNL_* inside the download.")
 
-    roles = pd.concat([_read_pipe(p, 15) for p in roles_files], ignore_index=True)
-    constr = pd.concat([_read_pipe(p, 11) for p in constr_files], ignore_index=True)
+    roles = pd.concat(roles_parts, ignore_index=True)
+    constr = pd.concat(constr_parts, ignore_index=True)
 
     # --- rol-level record ---
     r = pd.DataFrame({
@@ -126,16 +147,22 @@ def _load_comuna(code: str) -> pd.DataFrame:
         "pisos": _to_num(constr[CONSTR_COLS["pisos"]]),
     })
     keys = ["comuna", "manzana", "predial"]
-    agg = c.groupby(keys).apply(lambda g: pd.Series({
-        "sup_construida_m2": g["sup_construida_m2"].sum(min_count=1),
-        # area-weighted mean quality (lower code = better), plus modal material
-        "calidad_ponderada": np.average(g["calidad"], weights=g["sup_construida_m2"].fillna(0) + 1e-9)
-            if g["calidad"].notna().any() else np.nan,
-        "material_predom": g["material"].mode().iloc[0] if not g["material"].mode().empty else None,
-        "anio_construccion": g["anio"].max(),          # newest line as the rol's build year
-        "n_pisos": g["pisos"].max(),
-        "n_lineas_construccion": len(g),
-    }), include_groups=False).reset_index()
+    # area-weighted quality: sum(calidad*area)/sum(area) over lines with a quality
+    c["_cal_x_area"] = c["calidad"] * c["sup_construida_m2"]
+    c["_area_if_cal"] = c["sup_construida_m2"].where(c["calidad"].notna())
+    g = c.groupby(keys, dropna=False)
+    agg = g.agg(
+        sup_construida_m2=("sup_construida_m2", "sum"),
+        anio_construccion=("anio", "max"),          # newest line as the rol's build year
+        n_pisos=("pisos", "max"),
+        n_lineas_construccion=("sup_construida_m2", "size"),
+        _cal_area=("_cal_x_area", "sum"),
+        _area_cal=("_area_if_cal", "sum"),
+    ).reset_index()
+    agg["calidad_ponderada"] = agg["_cal_area"] / agg["_area_cal"].replace(0, np.nan)
+    mat = g["material"].agg(lambda s: s.mode().iloc[0] if not s.mode(dropna=True).empty else None)
+    agg = agg.merge(mat.rename("material_predom").reset_index(), on=keys)
+    agg = agg.drop(columns=["_cal_area", "_area_cal"])
 
     df = r.merge(agg, on=keys, how="left")
     df["comuna_code"] = code
