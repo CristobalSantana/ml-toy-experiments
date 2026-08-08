@@ -4,3 +4,4 @@ matplotlib>=3.7
 torch>=2.2   # CPU is enough and deliberately used for training determinism
 pandas>=2.0  # comparison-table aggregation/export only
 pyyaml>=6.0  # experiments/*/config.yaml parsing
+openpyxl>=3.1  # datasets/bcch_ipv: read the BDE IPV Excel export
