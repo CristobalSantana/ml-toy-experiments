@@ -19,3 +19,7 @@ checkpoints/
 # what was retrieved, so provenance is versioned without the bulk bytes.
 datasets/**/raw/
 datasets/**/processed/
+
+# personal API tokens (e.g. TABPFN_TOKEN) - never committed
+.env
+**/.env
