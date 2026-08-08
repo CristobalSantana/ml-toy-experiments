@@ -101,10 +101,13 @@ def run_arm(arm: str, X, y, groups, cfg, model_names: list[str], n_jobs: int = -
     n_folds = cfg["split"]["n_folds"]
     done = already_done()
 
+    arm_rows = cfg.get("regime_limited", {}).get("n_rows", models.TABPFN_MAX_SAMPLES)
+    tabpfn_max_train = cfg.get("regime_limited", {}).get(
+        "tabpfn_cpu_max_train", models.TABPFN_CPU_MAX_SAMPLES)
+
     for seed in seeds:
         if arm == "regime_limited":
-            Xa, ya, ga = subsample_within_groups(
-                X, y, groups, models.TABPFN_MAX_SAMPLES, seed)
+            Xa, ya, ga = subsample_within_groups(X, y, groups, arm_rows, seed)
         else:
             Xa, ya, ga = X, y, groups
 
@@ -119,9 +122,9 @@ def run_arm(arm: str, X, y, groups, cfg, model_names: list[str], n_jobs: int = -
                 if key in done:
                     print(f"  skip {name} {arm} seed={seed} fold={fold} (already done)", flush=True)
                     continue
-                if name == "tabpfn" and len(tr) > models.TABPFN_MAX_SAMPLES:
-                    print(f"  skip tabpfn: {len(tr)} train rows exceeds its "
-                          f"{models.TABPFN_MAX_SAMPLES} limit", flush=True)
+                if name == "tabpfn" and len(tr) > tabpfn_max_train:
+                    print(f"  skip tabpfn: {len(tr)} train rows exceeds its CPU limit "
+                          f"of {tabpfn_max_train}", flush=True)
                     continue
 
                 t0 = time.perf_counter()

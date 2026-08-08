@@ -22,6 +22,7 @@ and is recorded as such rather than estimated.
 
 from __future__ import annotations
 
+import datetime as _dt
 import threading
 import time
 from dataclasses import dataclass, asdict, field
@@ -40,6 +41,11 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 # TabPFN's own documented limits, read from tabpfn.inference_config
 TABPFN_MAX_SAMPLES = 10_000
 TABPFN_MAX_FEATURES = 500
+# On CPU it enforces a second, stricter ceiling (tabpfn.validation): more than
+# 5,000 training rows is "not allowed by default due to slow performance". We
+# size the regime-limited arm under this rather than overriding it, so TabPFN
+# runs in the configuration its authors support on this hardware.
+TABPFN_CPU_MAX_SAMPLES = 5_000
 
 TREE_NATIVE = {"lightgbm", "catboost"}   # consume categoricals/NaN directly
 CLASSICAL = ["ridge", "random_forest", "lightgbm", "catboost", "mlp"]
@@ -107,6 +113,10 @@ class FitResult:
     peak_memory_mb: float
     flops_estimate: float | None = None
     energy_joules: float | None = None   # not measurable on this machine
+    # Wall-clock start of the fit. Recorded because timing is a headline metric
+    # and CPU contention silently inflates it: with a timestamp, a contaminated
+    # window is auditable after the fact instead of invisible.
+    started_at: str = ""
     notes: str = ""
 
     def as_row(self) -> dict:
@@ -223,6 +233,7 @@ def fit_evaluate(
     name: str, X_tr: pd.DataFrame, y_tr: pd.Series, X_te: pd.DataFrame, y_te: pd.Series,
     seed: int, fold: int, arm: str, n_jobs: int = -1, notes: str = "",
 ) -> FitResult:
+    started_at = _dt.datetime.now().isoformat(timespec="seconds")
     Xtr = prepare_for_model(name, X_tr)
     Xte = prepare_for_model(name, X_te)
     est = build_estimator(name, seed, Xtr, n_jobs=n_jobs)
@@ -253,5 +264,6 @@ def fit_evaluate(
         fit_seconds=fit_s, predict_seconds=pred_s, peak_memory_mb=mem.delta_mb,
         flops_estimate=estimate_flops(name, len(X_tr), X_tr.shape[1], est),
         energy_joules=None,
+        started_at=started_at,
         notes=notes,
     )

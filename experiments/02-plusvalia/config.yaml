@@ -62,6 +62,17 @@ split:
   n_folds: 5                   # grouped K-fold by manzana
   seeds: [0, 1, 2, 3, 4]       # every reported number is mean ± spread over these
 
+# The regime-limited arm exists because TabPFN cannot see the full dataset.
+# Its architectural ceiling is 10,000 samples / 500 features, but on CPU it
+# additionally refuses more than 5,000 training rows by default ("not allowed
+# by default due to slow performance"). We respect that CPU limit rather than
+# override it, so TabPFN runs in its supported configuration on this hardware.
+# With 5-fold CV, training is 4/5 of the arm, so 5,800 rows keeps training
+# (~4,600) safely under 5,000. All six models compete on this same subsample.
+regime_limited:
+  n_rows: 5800
+  tabpfn_cpu_max_train: 5000
+
 leakage:
   # A feature whose |Spearman| with the target exceeds this is treated as a
   # deterministic reconstruction and aborts the run.
