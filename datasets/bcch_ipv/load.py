@@ -58,7 +58,21 @@ def inspect() -> None:
             print(df.head(8).to_string(max_cols=12))
 
 
-def _parse_quarter(text: str):
+def _parse_quarter(text):
+    """Return the Timestamp of the quarter's first month, or None.
+
+    Handles both BDE export flavours: real datetime cells (the IPV cuadro
+    exports '2002-03-01 00:00:00' per quarter) and text labels ('2002.I',
+    '2014 T1', 'IV 2015').
+    """
+    if isinstance(text, (pd.Timestamp, datetime)) or hasattr(text, "year") and hasattr(text, "month"):
+        try:
+            ts = pd.Timestamp(text)
+        except (ValueError, TypeError):
+            return None
+        return pd.Timestamp(ts.year, ((ts.month - 1) // 3) * 3 + 1, 1)
+    if text is None or (isinstance(text, float) and np.isnan(text)):
+        return None
     m = _QUARTER_RE.search(str(text).strip().upper())
     if not m:
         return None
@@ -108,6 +122,52 @@ def _assert_is_price_index(path: Path, sheets: dict[str, pd.DataFrame]) -> None:
         )
 
 
+def _tidy_sheet(df: pd.DataFrame, min_quarters: int = 8) -> pd.DataFrame | None:
+    """Reshape one BDE sheet to long form: (quarter, series_col, index_value).
+
+    The BDE exports the IPV cuadro wide - one header row of quarter dates, then
+    one row per series whose leading cell is the series description. We also
+    handle the transposed layout (quarters down a column) since other BDE
+    cuadros export that way. Returns None if the sheet has no quarter axis
+    (metadata sheets).
+    """
+    # --- wide: quarters across a header row ---
+    row_hits = {i: df.loc[i].map(lambda v: _parse_quarter(v) is not None).sum() for i in df.index}
+    header_row = max(row_hits, key=row_hits.get)
+    if row_hits[header_row] >= min_quarters:
+        quarters = df.loc[header_row].map(_parse_quarter)
+        qcols = [c for c in df.columns if quarters[c] is not None and pd.notna(quarters[c])]
+        labcols = [c for c in df.columns if c not in qcols]
+        body = df.loc[[i for i in df.index if i > header_row]]
+        if body.empty:
+            return None
+        # series name = first non-empty label cell on the row (fallback: row index)
+        names = (body[labcols].astype(str).replace({"nan": ""}).apply(
+                    lambda r: next((v.strip() for v in r if v.strip()), ""), axis=1)
+                 if labcols else pd.Series("", index=body.index))
+        names = names.mask(names.eq(""), body.index.map(lambda i: f"row{i}"))
+        out = pd.DataFrame(
+            body[qcols].apply(pd.to_numeric, errors="coerce").to_numpy(),
+            index=pd.Index(names, name="series_col"),
+            columns=pd.Index([quarters[c] for c in qcols], name="quarter"),
+        )
+        return (out.stack().rename("index_value").reset_index()
+                   .dropna(subset=["index_value"]))
+
+    # --- transposed: quarters down a column ---
+    col_hits = {c: df[c].map(lambda v: _parse_quarter(v) is not None).sum() for c in df.columns}
+    qcol = max(col_hits, key=col_hits.get)
+    if col_hits[qcol] < min_quarters:
+        return None
+    quarters = df[qcol].map(_parse_quarter)
+    keep = quarters.notna()
+    vals = df.loc[keep, [c for c in df.columns if c != qcol]].apply(pd.to_numeric, errors="coerce")
+    vals.index = pd.Index(quarters[keep], name="quarter")
+    vals.columns = pd.Index([f"col{c}" for c in vals.columns], name="series_col")
+    return (vals.stack().rename("index_value").reset_index()
+                .dropna(subset=["index_value"]))
+
+
 def build() -> None:
     files = _raw_files()
     if not files:
@@ -119,34 +179,11 @@ def build() -> None:
     tidy_frames = []
     for path in files:
         for sheet, df in _read_all_sheets(path).items():
-            # Locate the quarter axis: the row or column with the most parseable quarters.
-            col_scores = [(c, df[c].map(lambda v: _parse_quarter(v) is not None).sum()) for c in df.columns]
-            best_col, best_col_n = max(col_scores, key=lambda t: t[1])
-            row_scores = [(i, df.loc[i].map(lambda v: _parse_quarter(v) is not None).sum()) for i in df.index]
-            best_row, best_row_n = max(row_scores, key=lambda t: t[1])
-
-            if max(best_col_n, best_row_n) < 8:
-                continue  # not the data sheet
-
-            if best_col_n >= best_row_n:
-                # quarters run down a column; series are the other columns
-                quarters = df[best_col].map(_parse_quarter)
-                keep = quarters.notna()
-                long = df.loc[keep].drop(columns=[best_col]).apply(pd.to_numeric, errors="coerce")
-                long.insert(0, "quarter", quarters[keep].values)
-                melted = long.melt(id_vars="quarter", var_name="series_col", value_name="index_value")
-            else:
-                # quarters run across a row; series are the other rows
-                quarters = df.loc[best_row].map(_parse_quarter)
-                qcols = [c for c in df.columns if pd.notna(quarters[c])]
-                block = df[qcols].apply(pd.to_numeric, errors="coerce")
-                block.columns = [quarters[c] for c in qcols]
-                melted = block.reset_index().melt(id_vars="index", var_name="quarter", value_name="index_value")
-                melted = melted.rename(columns={"index": "series_col"})
-
-            melted = melted.dropna(subset=["index_value"])
-            melted["source_sheet"] = sheet
-            tidy_frames.append(melted)
+            tidy = _tidy_sheet(df)
+            if tidy is None:
+                continue
+            tidy["source_sheet"] = sheet
+            tidy_frames.append(tidy)
 
     if not tidy_frames:
         sys.exit("ABORT: no sheet had a recognizable quarterly axis. Run --inspect and "
@@ -161,6 +198,22 @@ def build() -> None:
     print(f"IPV: {len(tidy)} obs, {n_series} series, {span[0].date()} .. {span[1].date()}")
     if span[0] > pd.Timestamp(2015, 1, 1):
         print(f"WARNING: series starts {span[0].date()} (brief expects coverage from 2014).")
+
+    # CRITERIA.md needs the IPV "per zone and dwelling type"; the BDE lets you
+    # export just the headline series, which parses fine but cannot support the
+    # per-zone drift analysis. Say so loudly rather than discovering it later.
+    names = " ".join(tidy["series_col"].unique()).lower()
+    has_dwelling = any(k in names for k in ("casa", "departamento", "depto"))
+    has_zone = any(k in names for k in ("zona", "region", "regi", "metropolitana", "rm ", "norte", "sur", "centro"))
+    if not (has_dwelling and has_zone):
+        print(
+            "\nWARNING: this export has no zone/dwelling-type disaggregation "
+            f"({n_series} series: {list(tidy['series_col'].unique())[:4]}).\n"
+            "  CRITERIA.md specifies the temporal target 'per zone and dwelling type'.\n"
+            "  The headline series alone supports only an aggregate drift analysis.\n"
+            "  To get the full breakdown, re-export the IPV cuadro from the BDE with the\n"
+            "  casas/departamentos and geographic-zone series selected.\n"
+        )
 
     out = PROCESSED_DIR / "ipv_quarterly.csv"
     tidy.to_csv(out, index=False, encoding="utf-8")

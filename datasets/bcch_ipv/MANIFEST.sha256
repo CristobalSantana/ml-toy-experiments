@@ -1,0 +1,17 @@
+{
+  "dataset": "bcch_ipv",
+  "retrieval_date": "2026-08-08",
+  "source": "Banco Central de Chile - Base de Datos Estadísticos (BDE), IPV cuadro (manual export)",
+  "publication_lag_days": 120,
+  "n_obs": 97,
+  "n_series": 1,
+  "quarter_min": "2002-01-01",
+  "quarter_max": "2026-01-01",
+  "raw_files": {
+    "ipv_bcch.xlsx": {
+      "sha256": "cdb29a408a3eec143e56ade866c813a7e2898644a14554b75935c2eeaf75e549",
+      "bytes": 7298
+    }
+  },
+  "generated_at": "2026-08-08T14:14:53"
+}
