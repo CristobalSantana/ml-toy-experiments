@@ -1,0 +1,45 @@
+{
+  "shap_top": [
+    {
+      "feature": "num__calidad_ponderada",
+      "mean_abs_shap": 0.1810781039202204
+    },
+    {
+      "feature": "cat__comuna_nombre_Las Condes",
+      "mean_abs_shap": 0.03446926112549782
+    },
+    {
+      "feature": "num__es_departamento",
+      "mean_abs_shap": 0.026148912596252936
+    },
+    {
+      "feature": "num__log10_sup_terreno_m2",
+      "mean_abs_shap": 0.022528964609808372
+    },
+    {
+      "feature": "num__n_pisos",
+      "mean_abs_shap": 0.01741102284279429
+    },
+    {
+      "feature": "num__log10_sup_construida_m2",
+      "mean_abs_shap": 0.014820273314679616
+    }
+  ],
+  "symbolic": {
+    "expression": "(calidad_ponderada * -0.1020825) + 1.822678",
+    "complexity": 5,
+    "mae": 0.03808276309587309,
+    "blackbox_mae": 0.07599950309742143,
+    "ratio": 0.5010922643409388,
+    "readable": true,
+    "search_seconds": 64.87599450000562,
+    "n_rows_fit": 3433,
+    "n_rows_scored": 1567
+  },
+  "interpret_sample": {
+    "n_rows": 20049,
+    "n_manzanas": 419,
+    "model": "random_forest",
+    "in_sample_mae": 0.005647119334245279
+  }
+}

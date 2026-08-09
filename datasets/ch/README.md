@@ -6,7 +6,7 @@ convention shared by all countries.
 | Dataset | Source | What it is |
 |---|---|---|
 | [`sii_cadastre`](sii_cadastre/) | Servicio de Impuestos Internos (SII) | "Detalle Catastral": assessed fiscal value (avalúo fiscal), built/land area, construction quality, year and destino, per `rol` (comuna-manzana-predio) |
-| [`bcch_ipv`](bcch_ipv/) | Banco Central de Chile (BDE) | IPV: quarterly housing **price** index, broken down by dwelling type (casas/departamentos, nuevas/usadas) and geographic zone |
+| [`central_bank_hpi`](central_bank_hpi/) | Banco Central de Chile (BDE) | IPV: quarterly housing **price** index, broken down by dwelling type (casas/departamentos, nuevas/usadas) and geographic zone |
 
 ## Notes on Chilean data
 

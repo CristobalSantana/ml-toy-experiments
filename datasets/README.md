@@ -38,4 +38,4 @@ Guidelines:
 | Country | Dataset | What it is |
 |---|---|---|
 | 🇨🇱 `ch` | [`sii_cadastre`](ch/sii_cadastre/) | SII "Detalle Catastral" - assessed fiscal value (avalúo fiscal) per property |
-| 🇨🇱 `ch` | [`bcch_ipv`](ch/bcch_ipv/) | Banco Central IPV - quarterly housing price index, by zone and dwelling type |
+| 🇨🇱 `ch` | [`central_bank_hpi`](ch/central_bank_hpi/) | Central Bank housing price index - quarterly housing price index, by zone and dwelling type |

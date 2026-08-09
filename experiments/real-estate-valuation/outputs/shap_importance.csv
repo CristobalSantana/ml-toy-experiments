@@ -1,0 +1,25 @@
+feature,mean_abs_shap
+num__calidad_ponderada,0.1810781039202204
+cat__comuna_nombre_Las Condes,0.03446926112549782
+num__es_departamento,0.026148912596252936
+num__log10_sup_terreno_m2,0.022528964609808372
+num__n_pisos,0.01741102284279429
+num__log10_sup_construida_m2,0.014820273314679616
+num__anio_construccion,0.012940466683015074
+cat__comuna_nombre_Providencia,0.010339604630070139
+num__n_lineas_construccion,0.009551733105709727
+cat__comuna_nombre_El Bosque,0.006921914873068186
+cat__material_predom_B,0.005747104118834419
+cat__comuna_nombre_Nunoa,0.0036771333529493733
+cat__material_predom_C,0.0034752539830630023
+cat__comuna_nombre_Puente Alto,0.0026143807611635327
+cat__comuna_nombre_La Florida,0.0006814138059838123
+cat__comuna_nombre_Maipu,0.000624310973303749
+cat__comuna_nombre_Macul,0.0005879484283761926
+cat__material_predom_E,0.00028070043613654517
+cat__material_predom_F,3.1949072154872275e-05
+cat__material_predom_G,2.0060997544367098e-05
+cat__material_predom_A,8.176822496766427e-06
+cat__material_predom_K,1.966987618956045e-06
+cat__material_predom_GC,9.360288423637632e-08
+cat__material_predom_GA,2.2168358983702255e-08
