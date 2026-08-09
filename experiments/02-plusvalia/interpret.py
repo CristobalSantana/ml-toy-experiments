@@ -167,12 +167,26 @@ def main() -> None:
     axes = np.atleast_1d(axes)
     ale_all = {}
     for ax, feat in zip(axes, top):
-        pd_res = partial_dependence(est, Xs.iloc[:5000], [feat], kind="average",
-                                    grid_resolution=20)
-        gx = pd_res["grid_values"][0]; gy = pd_res["average"][0]
-        ax.plot(gx, gy - gy.mean(), label="PDP (centred)", lw=2)
+        panel = Xs.iloc[:5000]
+        # PDP over rows where the feature actually exists. log10_sup_terreno_m2
+        # is NaN for 86% of rows (apartments hold no land of their own), and a
+        # percentile grid over a mostly-NaN column comes back all-NaN and plots
+        # nothing at all. Restricting to houses also makes the curve honest:
+        # it is a statement about properties that have land.
+        pdp_rows = panel[panel[feat].notna()]
+        # percentiles (0.01, 0.99) instead of sklearn's default (0.05, 0.95) so
+        # the PDP spans nearly the same range as ALE - comparing two curves
+        # drawn over different x-ranges is worse than not comparing them.
+        pd_res = partial_dependence(est, pdp_rows, [feat], kind="average",
+                                    grid_resolution=20, percentiles=(0.01, 0.99))
+        gx = np.asarray(pd_res["grid_values"][0]); gy = np.asarray(pd_res["average"][0])
+        ok = np.isfinite(gx) & np.isfinite(gy)
+        if ok.sum() >= 2:
+            ax.plot(gx[ok], gy[ok] - gy[ok].mean(), label="PDP (centred)", lw=2)
+        else:
+            print(f"  WARNING: PDP unavailable for {feat} (grid degenerate)")
 
-        a = ale_1d(pred_fn, Xs.iloc[:5000], feat)
+        a = ale_1d(pred_fn, panel, feat)
         ale_all[feat] = a.to_dict("list")
         if not a.empty:
             ax.plot(a["x"], a["ale"], label="ALE", lw=2, ls="--")
