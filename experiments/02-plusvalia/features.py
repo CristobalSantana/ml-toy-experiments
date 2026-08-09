@@ -101,7 +101,9 @@ def build_features(df: pd.DataFrame, cfg: dict) -> tuple[pd.DataFrame, pd.Series
     # imputing 0 -> -inf would be nonsense, and 0 is meaningful, not missing.
     land = df["sup_terreno_m2"].replace(0, np.nan)
     f["log10_sup_terreno_m2"] = np.log10(land)
-    f["es_departamento"] = (df["sup_terreno_m2"] == 0).astype(int)
+    # float, not int: sklearn's partial_dependence refuses integer columns
+    # (implicit rounding), and the 0/1 values are identical either way.
+    f["es_departamento"] = (df["sup_terreno_m2"] == 0).astype(float)
 
     f["calidad_ponderada"] = df["calidad_ponderada"]
     f["anio_construccion"] = df["anio_construccion"]
