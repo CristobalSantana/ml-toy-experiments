@@ -38,6 +38,7 @@ experiments/  each experiment combines a data source + one or more models
 | Experiment | Question | Finding |
 |---|---|---|
 | [`kan_vs_mlp_battery_diffusion`](experiments/kan_vs_mlp_battery_diffusion/) | Can a KAN solve a PDE as a physics-informed network as well as an MLP with the same parameter budget? | KAN is ~1.6x more accurate, consistently across 5 seeds - but ~16x slower to train. |
+| [`02-plusvalia`](experiments/02-plusvalia/) | On real tabular data, does a tabular foundation model (TabPFN v2) beat gradient-boosted trees - and at what cost? | Classical methods win the pre-registered rule. TabPFN ties on accuracy inside its envelope but costs 173x the memory; its real limit is that it cannot ingest the data at all, which is worth ~2x more error than any architecture difference. |
 
 ## Data
 
