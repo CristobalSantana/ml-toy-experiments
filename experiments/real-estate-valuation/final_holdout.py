@@ -82,7 +82,8 @@ def main() -> None:
     print(summary.round(4).to_string())
     summary.to_csv(OUTPUT_DIR / "final_holdout_summary.csv")
 
-    pred_df = pd.DataFrame({"actual_log10": yh.to_numpy()})
+    pred_df = pd.DataFrame({"actual_log10": yh.to_numpy(),
+                            "comuna": Xh["comuna_nombre"].astype(str).to_numpy()})
     for name, p in preds.items():
         pred_df[f"pred_{name}"] = p
     pred_df.to_csv(OUTPUT_DIR / "final_holdout_predictions.csv", index=False)

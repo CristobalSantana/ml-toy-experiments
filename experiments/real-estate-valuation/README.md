@@ -234,7 +234,28 @@ For the best model, half of all properties are predicted within **0.021** on the
 log10 scale (~5%), 90% within 0.101 (~26%), but the worst 1% exceed 0.281
 (~91%). Valuation failures live in that tail, not in the average.
 
-### 3.6 Drift
+### 3.6 What this looks like in one commune
+
+Aggregate error tells you the model is good; it does not tell you what using it
+would feel like. So: **predicting assessed value per m² in Ñuñoa**, with the
+winning model, on the 12,449 holdout properties there - none of which it saw
+during training.
+
+![comuna case study](outputs/fig_comuna_case_study.png)
+
+**77% of properties land within ±10%** of their true assessed value, with a
+median absolute error of **4.1%** and a median bias of −1.0% (a very slight
+tendency to under-value). The scatter tightens as value rises: cheap property
+is harder, which makes sense given that the cheapest stock is also the most
+heterogeneous.
+
+Regenerate for any of the eight communes:
+
+```bash
+python make_figures.py --comuna "Las Condes"
+```
+
+### 3.7 Drift
 
 Against a **frozen** 2020 reference window (fixed, never rolling):
 

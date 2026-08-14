@@ -9,6 +9,7 @@ Deliberately few figures, each answering a different question:
   fig_model_comparison.png     which model, and at what cost
   fig_predicted_vs_actual.png  does the best model track reality
   fig_errors.png               how the error is distributed and where it lands
+  fig_comuna_case_study.png    the winner applied to one commune, concretely
   fig_drift.png                did the distribution move, and did cutting help
 
 (`fig_correlation_collinearity.png` comes from diagnostics.py, and the
@@ -26,6 +27,9 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
 OUTPUT_DIR = Path(__file__).resolve().parent / "outputs"
+# The cadastre stores commune names without accents; restore them for display.
+DISPLAY_NAME = {"Nunoa": "Ñuñoa", "Maipu": "Maipú"}
+
 COLORS = {"ridge": "#8c8c8c", "random_forest": "#1f77b4", "lightgbm": "#2ca02c",
           "catboost": "#ff7f0e", "mlp": "#9467bd", "tabpfn": "#d62728"}
 
@@ -159,6 +163,82 @@ def errors() -> None:
     plt.close(fig)
 
 
+def comuna_case_study(comuna: str = "Nunoa") -> None:
+    """The winning model applied to one commune: predicted vs actual, and error.
+
+    A national average hides what using the model would feel like in practice.
+    This is the same holdout, filtered to a single commune - properties the
+    model never saw, in one market a reader can hold in their head.
+    """
+    p = OUTPUT_DIR / "final_holdout_predictions.csv"
+    if not p.exists():
+        return
+    d = pd.read_csv(p)
+
+    if "comuna" not in d.columns:
+        # Older prediction files predate the comuna column. Rebuild it by
+        # position rather than refitting: features.build() is deterministic, so
+        # X[holdout] comes back in exactly the order the predictions were
+        # written in.
+        import sys as _sys
+        _sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import features as _F
+        X, y, _g, holdout, _ = _F.build(_F.load_config(), verbose=False)
+        comunas = X[holdout]["comuna_nombre"].astype(str).to_numpy()
+        if len(comunas) != len(d):
+            print("  skipping comuna case study: row counts do not line up")
+            return
+        d["comuna"] = comunas
+
+    summary = pd.read_csv(OUTPUT_DIR / "final_holdout_summary.csv")
+    best = summary.sort_values("mae").iloc[0]["model"]
+    sub = d[d["comuna"] == comuna]
+    if sub.empty:
+        print(f"  no holdout rows for comuna {comuna!r}; available: "
+              f"{sorted(d['comuna'].unique())}")
+        return
+
+    actual = 10 ** sub["actual_log10"].to_numpy()
+    pred = 10 ** sub[f"pred_{best}"].to_numpy()
+    pct = 100 * (pred - actual) / actual
+    within10 = float((np.abs(pct) <= 10).mean() * 100)
+
+    fig, axes = plt.subplots(1, 2, figsize=(13, 5.4))
+
+    ax = axes[0]
+    lim = (np.percentile(actual, 0.5), np.percentile(actual, 99.5))
+    ax.scatter(actual, pred, s=6, alpha=0.18, color=COLORS.get(best, "#1f77b4"),
+               edgecolor="none")
+    ax.plot(lim, lim, "r--", lw=1.6, label="perfect prediction")
+    ax.fill_between(lim, [l * 0.9 for l in lim], [l * 1.1 for l in lim],
+                    color="red", alpha=0.08, label="±10%")
+    ax.set_xlim(lim); ax.set_ylim(lim)
+    ax.set_xlabel("actual assessed value (UF/m²)")
+    ax.set_ylabel("predicted (UF/m²)")
+    ax.set_title(f"{len(sub):,} properties in {comuna}\nnever seen during training",
+                 fontsize=10)
+    ax.legend(fontsize=8, loc="upper left"); ax.grid(alpha=0.3)
+
+    ax = axes[1]
+    ax.hist(pct, bins=70, range=(-60, 60), color=COLORS.get(best, "#1f77b4"), alpha=0.85)
+    ax.axvline(0, c="r", ls="--", lw=1.4)
+    ax.axvline(np.median(pct), c="k", ls="-", lw=1.2,
+               label=f"median {np.median(pct):+.1f}%")
+    ax.set_xlabel("relative error (%)   negative = under-valued")
+    ax.set_ylabel("properties")
+    ax.set_title(f"{within10:.0f}% of properties predicted within ±10%\n"
+                 f"median |error| {np.median(np.abs(pct)):.1f}%", fontsize=10)
+    ax.legend(fontsize=8); ax.grid(alpha=0.3, axis="y")
+
+    label = DISPLAY_NAME.get(comuna, comuna)
+    fig.suptitle(f"Predicting assessed value per m² in {label} — {best}", fontsize=12)
+    fig.tight_layout()
+    fig.savefig(OUTPUT_DIR / "fig_comuna_case_study.png", dpi=150)
+    plt.close(fig)
+    print(f"  {comuna}: {len(sub):,} holdout properties, {within10:.0f}% within ±10%, "
+          f"median |error| {np.median(np.abs(pct)):.1f}%")
+
+
 def drift() -> None:
     """One figure for the whole drift question: did it move, and did cutting help."""
     mp, cp = OUTPUT_DIR / "drift_multivariate.csv", OUTPUT_DIR / "drift_cutoff_test.csv"
@@ -203,5 +283,10 @@ def drift() -> None:
 
 
 if __name__ == "__main__":
-    model_comparison(); predicted_vs_actual(); errors(); drift()
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--comuna", default="Nunoa", help="commune for the case-study figure")
+    a = ap.parse_args()
+    model_comparison(); predicted_vs_actual(); errors()
+    comuna_case_study(a.comuna); drift()
     print(f"Wrote fig_*.png -> {OUTPUT_DIR}")
