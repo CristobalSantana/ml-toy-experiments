@@ -33,22 +33,31 @@ they were retrieved.
 
 ### 1.1 Columns: used, created, dropped
 
-The cadastre ships 19 columns in the roles file and 11 in the construction-lines
-file. This is what happened to each one that mattered.
+The download ships **two** urban files, and the features come from both. Keeping
+that straight matters, because the two are at different grains: the roles file
+has one row per property, the construction-lines file has one row per
+construction line, so several rows per property.
 
-**Used as features (9).**
-
-| Feature | Origin | Meaning |
+| File | Grain | Columns it contributes here |
 |---|---|---|
-| `log10_sup_construida_m2` | **created** - log10 of `Superficie de la línea`, summed per property | Built area. Logged because areas span three orders of magnitude |
-| `log10_sup_terreno_m2` | **created** - log10 of `Superficie total del terreno`, 0 → NaN | Land area. Zero means "no land of its own", not "small", so it becomes NaN and is flagged instead |
-| `es_departamento` | **created** - `Superficie del terreno == 0` | Apartment flag. Derived, not assumed: those rows carry a median 8 floors against 1, and 32.1 against 20.5 UF/m² |
-| `calidad_ponderada` | **created** - area-weighted mean of `Código de calidad` across construction lines | Construction quality, 1 (Superior) to 5 (Inferior) |
-| `anio_construccion` | original (`Año de la línea`), newest line kept | Construction year |
-| `n_pisos` | original (`Número de Pisos`), max across lines | Floors |
-| `n_lineas_construccion` | **created** - count of construction lines per property | Structural complexity of the property |
-| `comuna_nombre` | original (`Código SII de la Comuna`, mapped to name) | Commune, 8 levels |
-| `material_predom` | original (`Código de material estructural`), modal across lines | Dominant structural material |
+| `BRTMPCATASN_*` (roles) | one row per property | commune, block, plot, address, assessed values, use, **land area**, shared-property and parent rols |
+| `BRTMPCATASNL_*` (construction lines) | several rows per property | material, **quality**, **year**, **built area**, floors |
+
+**Used as features (9)** - three from the roles file, six from the
+construction-lines file, which is aggregated up to one row per property first
+(areas summed, quality area-weighted, newest year, modal material).
+
+| Feature | Source file | Origin | Meaning |
+|---|---|---|---|
+| `log10_sup_construida_m2` | lines | **created** - log10 of `Superficie de la línea`, summed per property | Built area. Logged because areas span three orders of magnitude |
+| `log10_sup_terreno_m2` | roles | **created** - log10 of `Superficie total del terreno`, 0 → NaN | Land area. Zero means "no land of its own", not "small", so it becomes NaN and is flagged instead |
+| `es_departamento` | roles | **created** - `Superficie total del terreno == 0` | Apartment flag. Derived, not assumed: those rows carry a median 8 floors against 1, and 32.1 against 20.5 UF/m² |
+| `calidad_ponderada` | lines | **created** - area-weighted mean of `Código de calidad` across lines | Construction quality, 1 (Superior) to 5 (Inferior) |
+| `anio_construccion` | lines | original (`Año de la línea de construcción`), newest line kept | Construction year |
+| `n_pisos` | lines | original (`Número de Pisos`), max across lines | Floors |
+| `n_lineas_construccion` | lines | **created** - count of construction lines per property | Structural complexity of the property |
+| `comuna_nombre` | roles | original (`Código SII de la Comuna`, mapped to name) | Commune, 8 levels |
+| `material_predom` | lines | original (`Código de material estructural`), modal across lines | Dominant structural material |
 
 **Target.** `log10_avaluo_uf_per_m2` - **created** as
 `Avalúo fiscal total ÷ built area ÷ UF`, then log10. Deflation to UF is
@@ -63,7 +72,10 @@ model would learn as signal.
 | `Avalúo exento` | Same, indirectly: it **equals** the total assessed value in 51% of rows, and there `exento / area / UF` correlates 1.000000 with the target |
 | `Contribución semestral` | The property tax is a fixed rate times the avalúo, so it is the target times a constant |
 | `edad_anios` | A feature we created and then removed: age is exactly `2026 − year`, so it duplicated `anio_construccion` (Spearman −1.000, VIF ≈ 10¹⁵). See §1.2 |
-| `Dirección`, `Rol Bien Común`, `Rol Padre`, `Código de Ubicación` | Identifiers and cross-references, not property attributes |
+| `Dirección o nombre del predio` | Free text. Useful only for geocoding, which we did not do - there are no coordinates anywhere in the download |
+| `Rol Bien Común 1/2`, `Rol Padre`, `Código de Ubicación` | Cross-references to other *roles*, not attributes of this property |
+| `Manzana`, `Predial` | Identifiers. `comuna + manzana` is used as the **grouping key** for cross-validation, never as a feature - a block id would let a model memorise blocks rather than learn from attributes |
+| `Código de destino de la línea`, `Código de condición especial` | Per-construction-line detail that does not survive aggregation to one row per property |
 | Agrícola files | Empty for all eight communes, which are urban |
 | Non-residential *roles* | Only `destino = H` (residential) with positive built area is modelled |
 
