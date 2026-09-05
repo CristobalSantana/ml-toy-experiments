@@ -1,0 +1,41 @@
+# Every reproducible parameter, frozen in CRITERIA.md on 2026-09-05.
+# run_all.py refuses to start if this file no longer matches.
+
+seed: 20260905
+
+splits:
+  train_end: "2017-12-31"
+  val_end: "2018-12-31"
+  test_end: "2019-12-31"     # the data ends 2019-12-30
+
+horizons: [1, 24]
+
+daylight_elevation_deg: 5.0  # below this the panels are effectively off
+
+clear_sky:
+  # Empirical clear-sky envelope: the 90th percentile of capacity factor
+  # within each elevation bin, estimated on the TRAINING SPLIT ONLY so the
+  # test year cannot leak into the baseline it is scored against.
+  elevation_bin_deg: 1.0
+  quantile: 0.90
+
+features:
+  cf_lags: [1, 2, 3, 24]      # hours before the forecast is issued
+  use_clear_sky_index: true
+  use_target_geometry: true   # elevation and clear-sky output at t+h, known in advance
+
+models:
+  ridge:
+    alpha: 1.0
+  gbdt:
+    max_iter: 300
+    max_depth: 6
+    learning_rate: 0.06
+    early_stopping: false     # sklearn's default flips this above 10k samples
+  esn:
+    n_reservoir: 400
+    spectral_radius: 0.9
+    leak_rate: 0.3
+    input_scale: 0.5
+    ridge_alpha: 1.0
+    washout: 200              # hours discarded while the reservoir forgets its init

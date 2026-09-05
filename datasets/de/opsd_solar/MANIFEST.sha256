@@ -1,0 +1,18 @@
+{
+  "dataset": "opsd_de_solar",
+  "source": "Open Power System Data, time series package",
+  "release": "2020-10-06",
+  "url": "https://data.open-power-system-data.org/time_series/2020-10-06/time_series_60min_singleindex.csv",
+  "license": "see README - OPSD publishes the package under an open licence, with the underlying TSO data attributed to its sources",
+  "retrieval_date": "2026-09-05",
+  "file": "opsd_time_series_60min_2020-10-06.csv",
+  "bytes": 130339665,
+  "sha256": "6a7f2bc571314cbf9c321cc03437691cd4be95c3a6f075e60ff99e8035c704c8",
+  "hours_after_cleaning": 43696,
+  "first_hour": "2015-01-01 07:00:00+00:00",
+  "last_hour": "2019-12-30 22:00:00+00:00",
+  "centroid": {
+    "lat": 51.16,
+    "lon": 10.45
+  }
+}
