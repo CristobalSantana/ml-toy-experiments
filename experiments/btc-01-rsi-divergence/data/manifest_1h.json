@@ -1,0 +1,10 @@
+{
+  "symbol": "BTCUSDT",
+  "interval": "1h",
+  "source": "https://api.binance.com/api/v3/klines",
+  "retrieved_at": "2026-08-15T03:19:20+00:00",
+  "first_candle": "2017-08-17",
+  "last_candle": "2026-08-15",
+  "n_candles": 78712,
+  "sha256": "a224511ae73d49ded3fd66fc7fb33117f3d4c7d8672d5fd7519b81e9df73f827"
+}
