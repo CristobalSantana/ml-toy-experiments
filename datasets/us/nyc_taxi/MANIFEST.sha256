@@ -1,0 +1,45 @@
+{
+  "dataset": "nyc_taxi_yellow",
+  "source": "NYC Taxi & Limousine Commission, trip record data",
+  "url_pattern": "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{month}.parquet",
+  "license": "public domain (NYC Open Data / TLC), see README",
+  "retrieval_date": "2026-09-05",
+  "months": {
+    "2019-06": {
+      "file": "yellow_tripdata_2019-06.parquet",
+      "bytes": 102903344,
+      "rows": 6971560,
+      "sha256": "acc434ffb54b70cbba1319f31f1a38584d9d4e8863fbbeaa4944bb577dfdf5cc"
+    },
+    "2020-03": {
+      "file": "yellow_tripdata_2020-03.parquet",
+      "bytes": 44442590,
+      "rows": 3007687,
+      "sha256": "6fa1343946bc1e3702fc351ff9818787cc40e4cf2b095d947ff5e452b5b42f84"
+    },
+    "2020-04": {
+      "file": "yellow_tripdata_2020-04.parquet",
+      "bytes": 4442620,
+      "rows": 238073,
+      "sha256": "3104e1e5548ade630988a4a8b9ec76c51a057b88159f78676c7d344f48491450"
+    },
+    "2023-06": {
+      "file": "yellow_tripdata_2023-06.parquet",
+      "bytes": 54999465,
+      "rows": 3307234,
+      "sha256": "3e60e29b5df45683948b68acbfb503aa459d14162c610622585c6580fdbfc73a"
+    },
+    "2024-05": {
+      "file": "yellow_tripdata_2024-05.parquet",
+      "bytes": 62553128,
+      "rows": 3723833,
+      "sha256": "1974230be2b5a3ea92e47b5eb77f32dbf1de896d81ad8df4ab6faba52749ad23"
+    },
+    "2024-06": {
+      "file": "yellow_tripdata_2024-06.parquet",
+      "bytes": 59859922,
+      "rows": 3539193,
+      "sha256": "677cf14c8347f745b583f012fbdba072334c6c4efa17bfd6a64369f2ba30329c"
+    }
+  }
+}

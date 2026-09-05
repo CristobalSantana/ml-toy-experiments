@@ -39,6 +39,7 @@ experiments/  each experiment combines a data source + one or more models
 |---|---|---|
 | [`kan_vs_mlp_battery_diffusion`](experiments/kan_vs_mlp_battery_diffusion/) | Can a KAN solve a PDE as a physics-informed network as well as an MLP with the same parameter budget? | KAN is ~1.6x more accurate, consistently across 5 seeds - but ~16x slower to train. |
 | [`real-estate-valuation`](experiments/real-estate-valuation/) | On real tabular data, does a tabular foundation model (TabPFN v2) beat gradient-boosted trees - and at what cost? | Classical methods win the pre-registered rule: accuracy ties inside TabPFN's envelope, but CatBoost gets there with 7x less time and 224x less memory. TabPFN's real limit is that it cannot ingest the data at all, which costs ~2x more error than any architecture difference. |
+| [`drift-detector-overlap`](experiments/drift-detector-overlap/) | A drift detector is a classifier that tries to tell last month's data from this month's. Where does it stop working, and can that boundary be found on synthetic data first? | It fails as a cliff, not a slope: flawless until the distributions overlap ~80%, then it collapses - and where the cliff sits is set by the window size, not the drift. On real NYC taxi months the synthetic curve gets the *ordering* right and the *level* badly wrong, detecting 0.99 where it predicted 0.56. |
 | [`btc-01-rsi-divergence`](experiments/btc-01-rsi-divergence/) | Does RSI divergence, one of the most widely taught chart patterns, beat simply holding BTC after costs? | No, on both timeframes tested. Held out, it *lost* 33% (daily) and 24% (hourly) over a period when BTC rose 49%. The useful part is why it looked like it worked: the best of 18 parameter sets beat buy-and-hold in development and collapsed out of sample. |
 
 > **On the BTC experiments.** These are numbered as a series and are studies of
@@ -64,6 +65,7 @@ grouped by country and each documented with its source and license.
 |---|---|---|
 | 🇨🇱 `ch` | [`sii_cadastre`](datasets/ch/sii_cadastre/) | SII - assessed fiscal value (avalúo fiscal) per property |
 | 🇨🇱 `ch` | [`central_bank_hpi`](datasets/ch/central_bank_hpi/) | Central Bank of Chile - quarterly housing price index (IPV) |
+| 🇺🇸 `us` | [`nyc_taxi`](datasets/us/nyc_taxi/) | NYC Taxi & Limousine Commission - one row per taxi trip, monthly since 2009 |
 
 ## Models
 

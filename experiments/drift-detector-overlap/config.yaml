@@ -1,0 +1,50 @@
+# Every reproducible parameter for the drift-detector experiment.
+#
+# The values here are the ones frozen in CRITERIA.md on 2026-09-05. This file
+# exists so a reader can check them without reading plotting code; it is not a
+# place to tune the experiment. `run_all.py` asserts that what it loads still
+# matches the pre-registration.
+
+seed: 20260905
+
+detector:
+  # Classifier two-sample test (Lopez-Paz and Oquab, 2017).
+  max_iter: 100
+  max_depth: 6
+  learning_rate: 0.1
+  # CRITERIA fixed max_iter but left this unspecified, and the sklearn default
+  # ("auto") switches early stopping ON above 10,000 samples. That would make
+  # the classifier weaker at exactly the large-n end of the sweep - at
+  # n = 50,000 it stopped after 24 iterations instead of 100 - and prediction
+  # P3 is about what changes with n. Held off so the detector is one fixed
+  # model at every window size. Recorded as a deviation in README.md.
+  early_stopping: false
+  test_size: 0.5          # stratified; the classifier is scored only here
+  alpha: 0.05             # one-sided binomial test against accuracy = 0.5
+
+synthetic:
+  # Overlap is set analytically, not searched for:
+  #   OVL = 2 * Phi(-delta / 2 sigma)  ->  delta = -2 * Phi^-1(OVL / 2)
+  ovl_min: 0.05
+  ovl_max: 1.00
+  ovl_step: 0.05
+  n_per_side: [500, 5000, 50000]
+  n_features: [1, 8]      # 1 = clean signal; 8 = same signal, 7 nuisance dims
+  trials_per_cell: 100    # half genuinely drifted, half null
+
+real:
+  n_per_side: 50000       # identical for all pairs, so they are comparable
+  ovl_bins: 100
+  pairs:
+    - {id: 0, name: "null (2024-06 split in half)", a: "2024-06", b: "2024-06", split: true}
+    - {id: 1, name: "adjacent months",             a: "2024-05", b: "2024-06", split: false}
+    - {id: 2, name: "one year, same season",       a: "2023-06", b: "2024-06", split: false}
+    - {id: 3, name: "pandemic shutdown",           a: "2020-03", b: "2020-04", split: false}
+    - {id: 4, name: "pre-pandemic vs now",         a: "2019-06", b: "2024-06", split: false}
+
+sample_size:
+  # P6: a fixed, small, real shift seen through windows of growing size.
+  pair: 1                 # adjacent months
+  n_grid: [1000, 5000, 20000, 100000, 500000, 1000000]
+  repeats: 20             # independent subsamples at each n
+  alpha: 0.05

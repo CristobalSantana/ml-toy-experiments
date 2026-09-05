@@ -1,0 +1,13 @@
+n_per_side,arm,mean_flagged,min_flagged,max_flagged,repeats,n_features
+1000,drifted,0.35,0,3,20,7
+1000,control,0.35,0,3,20,7
+5000,drifted,1.0,0,4,20,7
+5000,control,0.0,0,0,20,7
+20000,drifted,3.2,1,6,20,7
+20000,control,0.25,0,4,20,7
+100000,drifted,5.75,5,6,20,7
+100000,control,0.15,0,1,20,7
+500000,drifted,6.8,6,7,20,7
+500000,control,0.1,0,1,20,7
+1000000,drifted,7.0,7,7,20,7
+1000000,control,0.05,0,1,20,7

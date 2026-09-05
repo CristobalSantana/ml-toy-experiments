@@ -1,0 +1,6 @@
+pair,name,a,b,is_null,n_per_side,accuracy,p_value,drift_called,mean_overlap,min_overlap,min_overlap_feature
+0,null (2024-06 split in half),2024-06,2024-06,True,50000,0.5024,0.1425707176013154,False,0.9883571428571427,0.98402,tip_amount
+1,adjacent months,2024-05,2024-06,False,50000,0.51654,7.172118805651968e-14,True,0.9857599999999999,0.9800199999999986,pickup_hour
+2,"one year, same season",2023-06,2024-06,False,50000,0.53454,3.8665201002112095e-54,True,0.9816485714285712,0.9736,trip_distance
+3,pandemic shutdown,2020-03,2020-04,False,50000,0.7681,0.0,True,0.8753285714285713,0.7915599999999998,trip_duration_min
+4,pre-pandemic vs now,2019-06,2024-06,False,50000,0.98962,0.0,True,0.8660971428571428,0.6865800000000002,total_amount
