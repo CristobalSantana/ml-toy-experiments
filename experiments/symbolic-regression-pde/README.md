@@ -114,7 +114,7 @@ gradient booster the library columns hands it the answer — `u_xx` is right
 there as an input, and all it has to learn is to multiply it by 1.33. The
 third row is what a black box on this data actually looks like: given only
 the raw five-point stencil of `u`, with no derivatives computed for it, the
-same booster is **47 times worse** (0.0951 against 0.0020). A second
+same booster is **46 times worse** (medians of 0.0951 against 0.0020). A second
 difference is a part in ten thousand of the values it is a difference of, and
 a tree that splits on those values cannot see it.
 
