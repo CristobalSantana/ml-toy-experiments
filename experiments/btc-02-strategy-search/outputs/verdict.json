@@ -1,0 +1,35 @@
+{
+  "n_strategies": 1412,
+  "buy_and_hold": {
+    "dev": 8.907474385440985,
+    "holdout": 0.4908494069467879
+  },
+  "real": {
+    "best_dev_return": 43.93359453982391,
+    "best_dev_excess": 3.535322806976291,
+    "best_holdout_return": 0.5480644940304733,
+    "best_params": [
+      2,
+      40
+    ],
+    "median_holdout_return": 0.01494830724527707,
+    "n_beating_dev": 377,
+    "n_beating_both": 39
+  },
+  "shuffle": {
+    "best_excess_median": 0.41442548557146763,
+    "best_excess_q95": 4.220757937784379,
+    "share_at_least_double": 0.32,
+    "n_beating_q05": 0.0,
+    "n_beating_q95": 764.849999999998,
+    "p_value": 0.07
+  },
+  "block": {
+    "best_excess_median": 1.4120846040435233,
+    "best_excess_q95": 12.679868842949851,
+    "share_at_least_double": 0.56,
+    "n_beating_q05": 0.0,
+    "n_beating_q95": 1318.7999999999997,
+    "p_value": 0.275
+  }
+}

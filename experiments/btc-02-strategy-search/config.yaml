@@ -1,0 +1,25 @@
+# Every reproducible parameter, frozen in CRITERIA.md on 2026-09-06.
+# run_all.py refuses to start if this file no longer matches.
+
+seed: 20260906
+
+# identical to btc-01, so the two experiments are directly comparable
+split:
+  dev_end: "2023-12-31"
+  holdout_start: "2024-01-01"
+
+costs:
+  fee: 0.0010          # Binance spot taker
+  slippage: 0.0005     # per side, charged on every position change
+
+grid:
+  fast_max: 40         # fast window: every integer from 2
+  slow_max: 200        # slow window: every multiple of slow_step
+  slow_step: 5
+
+nulls:
+  n_surrogates: 200
+  block_size: 20       # days, for the moving-block bootstrap
+
+# P3 is scored against this percentile of the shuffle null
+significance_percentile: 95
