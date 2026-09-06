@@ -109,8 +109,11 @@ class HDC:
     def scores(self, X):
         return self.m.decision_scores(X)
 
-    def predict_and_scores(self, X):
-        return self.m.predict_and_scores(X)
+    def predict_and_scores(self, X, dim_mask=None):
+        # dim_mask has to be forwarded, not dropped: the dimension-dropout arm
+        # asks for scores from a partly erased representation, and a wrapper
+        # that quietly ignored the mask would return the undamaged answer
+        return self.m.predict_and_scores(X, dim_mask=dim_mask)
 
     @property
     def n_parameters(self):
@@ -221,12 +224,16 @@ def main() -> None:
     hd = fitted["hdc"]
     for frac in cfg["robustness"]["dimension_dropout"]:
         mask = (rng.random(cfg["models"]["hdc"]["dim"]) >= frac).astype(np.float64)
-        p = hd.predict(Xte, dim_mask=mask)
+        # AUC and not only the labels: P4 is stated in AUC, and a labels-only
+        # path cannot answer it
+        p, s = hd.predict_and_scores(Xte, dim_mask=mask)
         rb.append({"kind": "dimension_dropout", "fraction": frac,
-                   "model": hd.name, "auc": float("nan"),
+                   "model": hd.name,
+                   "auc": float(roc_auc_score(yte, s)),
                    "balanced_accuracy": float(balanced_accuracy_score(yte, p)),
                    "accuracy": float(accuracy_score(yte, p))})
         print(f"  {frac:>4.0%} of HDC dimensions switched off   "
+              f"AUC {rb[-1]['auc']:.4f}   "
               f"balanced acc {rb[-1]['balanced_accuracy']:.4f}", flush=True)
 
     pd.DataFrame(rb).to_csv(OUT / "robustness.csv", index=False)

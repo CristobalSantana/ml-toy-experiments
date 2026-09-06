@@ -180,19 +180,26 @@ class HDClassifier:
             out[i:i + self.BATCH] = self._predict_encoded(enc, dim_mask)
         return out
 
-    def predict_and_scores(self, X: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def predict_and_scores(self, X: np.ndarray, dim_mask: np.ndarray | None = None
+                           ) -> tuple[np.ndarray, np.ndarray]:
         """Both, from one pass of encoding.
 
         Calling predict() and decision_scores() separately encodes the test
         set twice, and the encoding is the entire cost of this classifier.
+
+        `dim_mask` switches off a share of the dimensions, as in `predict`.
+        It belongs here as well because the robustness claim is about ranking
+        quality, and a labels-only path can report accuracy but not AUC.
         """
         X = np.asarray(X, dtype=np.float64)
-        pn = self.prototypes_ / (np.linalg.norm(self.prototypes_, axis=1,
-                                                keepdims=True) + 1e-12)
+        proto = (self.prototypes_ if dim_mask is None
+                 else self.prototypes_ * dim_mask)
+        pn = proto / (np.linalg.norm(proto, axis=1, keepdims=True) + 1e-12)
         pred = np.empty(len(X), dtype=self.classes_.dtype)
         score = np.empty(len(X), dtype=np.float64)
         for i, enc in self._batches(X):
-            en = enc / (np.linalg.norm(enc, axis=1, keepdims=True) + 1e-12)
+            e = enc if dim_mask is None else enc * dim_mask
+            en = e / (np.linalg.norm(e, axis=1, keepdims=True) + 1e-12)
             sim = en @ pn.T
             pred[i:i + self.BATCH] = self.classes_[np.argmax(sim, axis=1)]
             score[i:i + self.BATCH] = sim[:, 1] - sim[:, 0]

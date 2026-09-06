@@ -25,7 +25,11 @@ OUT = HERE / "outputs"
 BG = "#0e0e0e"
 FG = "#f5f0e8"
 GREY = "#8f8f8f"
-COLOURS = {"majority class": GREY, "logistic regression": "#7dd3fc",
+# a colour that is not any model's, so a threshold line never reads as a series
+WARN = "#4caf7d"
+# logistic regression was a pale blue, which read as the same series as
+# gradient boosting's blue in both the legend and the plot
+COLOURS = {"majority class": GREY, "logistic regression": "#9a7fd1",
            "gradient boosting": "#0284C7", "hyperdimensional": "#e69f00"}
 
 
@@ -98,15 +102,22 @@ def robustness() -> None:
            "share of feature values replaced (%)", "ROC AUC")
     axes[0].legend(facecolor=BG, edgecolor=GREY, labelcolor=FG, fontsize=9)
 
+    # same metric as the left panel, so the two kinds of damage are on one
+    # scale and P4 can be read straight off the axis
     dd = rb[rb["kind"] == "dimension_dropout"].sort_values("fraction")
-    axes[1].plot(dd["fraction"] * 100, dd["balanced_accuracy"], "o-", lw=2,
+    axes[1].plot(dd["fraction"] * 100, dd["auc"], "o-", lw=2,
                  ms=7, color=COLOURS["hyperdimensional"])
-    base = float(dd["balanced_accuracy"].iloc[0])
+    base = float(dd["auc"].iloc[0])
     axes[1].axhline(base, color=GREY, lw=1, ls=":")
     axes[1].text(2, base + 0.0004, "undamaged", color=GREY, fontsize=8.5)
+    # the pre-registered tolerance, drawn so the reader sees how much room
+    # the result had rather than being told it passed
+    axes[1].axhline(base - 0.02, color=WARN, lw=1.4, ls="--")
+    axes[1].text(2, base - 0.0196, "P4 allowed a drop of 0.02 AUC",
+                 color=WARN, fontsize=8.5)
+    axes[1].set_ylim(base - 0.026, base + 0.004)
     _style(axes[1], "HDC's own representation erased  (no equivalent for trees)",
-           "share of hypervector dimensions switched off (%)",
-           "balanced accuracy")
+           "share of hypervector dimensions switched off (%)", "ROC AUC")
 
     fig.suptitle("Two kinds of damage", color=FG, fontsize=12.5)
     fig.tight_layout()
@@ -121,20 +132,27 @@ def cost() -> None:
     c = c[c["model"] != "majority class"]
     fig, axes = plt.subplots(1, 2, figsize=(12.5, 4.6), facecolor=BG)
 
+    # Points, not bars. Both quantities span three orders of magnitude, so
+    # the axis has to be logarithmic - and on a logarithmic axis a bar's
+    # length means nothing: hyperdimensional's bar looked about twice
+    # gradient boosting's while the ratio is sixteen.
     for ax, col, title, xlabel in (
             (axes[0], "fit_seconds", "Time to fit", "seconds (log scale)"),
             (axes[1], "n_parameters", "What has to be kept afterwards",
              "stored numbers (log scale)")):
         y = np.arange(len(c))
-        ax.barh(y, c[col], color=[COLOURS.get(m, GREY) for m in c["model"]],
-                height=0.55)
-        for i, (v, a) in enumerate(zip(c[col], c["auc"])):
-            ax.text(v * 1.15, i, f"{v:,.0f}" if v > 10 else f"{v:.2f}",
-                    va="center", color=FG, fontsize=9)
+        lo = float(c[col].min()) * 0.35
+        for i, (m, v) in enumerate(zip(c["model"], c[col])):
+            ax.plot([lo, v], [i, i], color="#2a2a2a", lw=1.4, zorder=1)
+            ax.scatter([v], [i], s=150, color=COLOURS.get(m, GREY), zorder=3)
+        for i, v in enumerate(c[col]):
+            ax.text(v * 1.35, i, f"{v:,.0f}" if v >= 100 else f"{v:.2f}",
+                    va="center", color=FG, fontsize=9.5)
         ax.set_yticks(y, [f"{m}\nAUC {a:.3f}" for m, a in zip(c["model"], c["auc"])])
         for lbl in ax.get_yticklabels():
             lbl.set_color(FG)
         ax.set_xscale("log")
+        ax.set_xlim(lo, float(c[col].max()) * 6)
         _style(ax, title, xlabel)
 
     fig.suptitle("The price of the ranking, at the largest training size",
