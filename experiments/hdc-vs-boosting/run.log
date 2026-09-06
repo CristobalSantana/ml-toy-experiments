@@ -1,0 +1,5 @@
+  train pool 2024-05: 3,146,484 trips, 15.1% cash
+  test       2024-06: 200,000 trips, 14.9% cash
+
+=== arm A: learning curve ===
+  n=    100   AUC   majo 0.500  logr 0.515  gbdt 0.504  hdc 0.518

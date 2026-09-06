@@ -1,0 +1,34 @@
+# Every reproducible parameter, frozen in CRITERIA.md on 2026-09-05.
+# run_all.py refuses to start if this file no longer matches.
+
+seed: 20260905
+
+task:
+  train_month: "2024-05"
+  test_month: "2024-06"
+  test_size: 200000
+
+learning_curve:
+  train_sizes: [100, 300, 1000, 3000, 10000, 30000, 100000, 300000]
+  seeds: 5
+
+robustness:
+  # applied to both methods: feature values replaced by draws from the
+  # training distribution of that feature
+  input_corruption: [0.0, 0.1, 0.2, 0.4]
+  # HDC only. A gradient booster has no equivalent to zeroing part of its
+  # representation, and inventing one would compare two different things.
+  dimension_dropout: [0.0, 0.2, 0.5, 0.8]
+  n_train: 30000
+
+models:
+  logreg:
+    max_iter: 1000
+  gbdt:
+    max_iter: 200
+    max_depth: 6
+    early_stopping: false
+  hdc:
+    dim: 10000
+    levels: 64
+    retrain_epochs: 0    # one pass. Corrective epochs are iterative learning.

@@ -1,0 +1,25 @@
+# Every reproducible parameter, frozen in CRITERIA.md on 2026-09-05.
+seed: 20260905
+
+alpha: 0.1                  # target coverage 1 - alpha = 90%
+
+calibration_month: "2024-06"
+months: ["2024-06", "2024-05", "2023-06", "2020-04", "2019-06"]
+
+splits:
+  n_fit: 100000             # trains the point predictor
+  n_calibrate: 50000        # sets the interval width, never seen by the model
+  n_eval: 50000             # scored; disjoint from both of the above
+
+recalibration:
+  # the remedy arm: how little fresh labelled data restores the guarantee
+  n_fresh: 2000
+
+features: [trip_distance, trip_duration_min, passenger_count,
+           pickup_hour, pu_location, do_location]
+
+model:
+  max_iter: 300
+  max_depth: 6
+  learning_rate: 0.08
+  early_stopping: false     # sklearn flips this on above 10k samples
