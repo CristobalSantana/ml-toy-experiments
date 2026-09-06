@@ -1,0 +1,21 @@
+{
+  "true_coef": 1.3333333333333333,
+  "control_coef": 1.3333381632866106,
+  "control_rel_error": 3.622464957997451e-06,
+  "cliff_raw": 2e-08,
+  "cliff_smoothed": {
+    "5": 1e-07,
+    "11": 5e-07,
+    "21": -1.0,
+    "41": -1.0
+  },
+  "best_window": 11,
+  "cliff_by_threshold": {
+    "0.0001": 5e-09,
+    "0.001": 1e-08,
+    "0.01": 2e-08,
+    "0.1": 1e-07
+  },
+  "arm_d_sigma": 2e-08,
+  "tolerance": 0.05
+}

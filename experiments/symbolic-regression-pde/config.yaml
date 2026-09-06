@@ -1,0 +1,39 @@
+# Every reproducible parameter, frozen in CRITERIA.md on 2026-09-05.
+# run_all.py refuses to start if this file no longer matches.
+
+seed: 20260905
+
+domain:
+  n_burn: 20      # time steps dropped: the flux switches on abruptly at t=0
+  n_edge: 3       # x points dropped per side: no ghost nodes at a Neumann wall
+
+sweep:
+  # sigma as a fraction of the concentration range
+  # CRITERIA froze one point per decade. P2 asks whether the transition is
+  # narrower than a decade, which one point per decade cannot answer, so the
+  # frozen levels are kept and 2x / 5x points added around the transition.
+  sigma: [0.0, 1.0e-9, 2.0e-9, 5.0e-9, 1.0e-8, 2.0e-8, 5.0e-8,
+          1.0e-7, 2.0e-7, 5.0e-7, 1.0e-6, 1.0e-5, 1.0e-4, 1.0e-3, 1.0e-2]
+  seeds: 5
+  threshold: 0.01
+  threshold_sensitivity: [1.0e-4, 1.0e-3, 1.0e-2, 1.0e-1]
+
+smoothing:
+  polyorder: 3
+  windows: [5, 11, 21, 41]
+  # Savitzky-Golay pads the edges, so it corrupts a band of window//2 points
+  # at the flux boundary. The trim has to cover it or the regression is fed
+  # invented data. See "Deviations" in README.md.
+  widen_trim: true
+
+recovery:
+  coefficient_tolerance: 0.05
+  seeds_required: 3
+
+extrapolation:
+  train_fraction: 0.5
+  stencil: 5          # raw u values handed to the black-box arm
+  gbdt:
+    max_iter: 200
+    max_depth: 6
+    early_stopping: false
