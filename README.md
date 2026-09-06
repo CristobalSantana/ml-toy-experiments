@@ -24,14 +24,24 @@ experiments/  each experiment combines a data source + one or more models
 - **`generators/<name>/`** - `generate.py`, a `README.md` explaining the
   equation and its meaning, and an `outputs/` folder with the reference data.
 - **`datasets/<country>/<name>/`** - a loader plus a `README.md` documenting
-  the source, license, and provenance of the public data. Grouped by ISO
-  country code (`ch`, ...), since public data is national: its source, units
-  and administrative concepts only make sense within one country's system.
-- **`models/<name>/`** - the implementation and a short `README.md`.
-- **`experiments/<name>/`** - `run.py` (single entry point, runnable end to
-  end), `config.yaml` (every reproducible parameter - constants, seeds,
-  sizes), a `README.md` with the finding and how to reproduce it, and
-  `outputs/`, `checkpoints/`, `media/` for the results.
+  the source, license, and provenance of the public data. Grouped by
+  country code (`ch`, `us`, `de`), since public data is national: its
+  source, units and administrative concepts only make sense within one
+  country's system.
+- **`models/<name>/`** - the implementation and a short `README.md`. Only
+  for models reused across experiments; one written for a single experiment
+  lives in that experiment's folder, next to the pre-registration that
+  constrains it (`hdc.py`, `sindy.py`, `snn.py`, and the echo state network
+  inside `solar-forecast-skill/models.py`).
+- **`experiments/<name>/`** - `run_all.py` (single entry point, runnable end
+  to end; the oldest experiment still calls it `run.py`), `config.yaml`
+  (every reproducible parameter - constants, seeds, sizes), a `README.md`
+  with the finding and how to reproduce it, and `outputs/`, `checkpoints/`,
+  `media/` for the results.
+- **`experiments/<name>/CRITERIA.md`** - for the pre-registered ones, the
+  predictions written down *before* the results existed. It is never edited
+  afterwards; where the experiment departed from it, the departure is
+  recorded in that experiment's `README.md` under "Deviations".
 
 ## Experiments
 
@@ -66,10 +76,16 @@ grouped by country and each documented with its source and license.
 
 | Country | Dataset | Source |
 |---|---|---|
-| 🇨🇱 `ch` | [`sii_cadastre`](datasets/ch/sii_cadastre/) | SII - assessed fiscal value (avalúo fiscal) per property |
+| 🇨🇱 `ch` [^1] | [`sii_cadastre`](datasets/ch/sii_cadastre/) | SII - assessed fiscal value (avalúo fiscal) per property |
 | 🇨🇱 `ch` | [`central_bank_hpi`](datasets/ch/central_bank_hpi/) | Central Bank of Chile - quarterly housing price index (IPV) |
 | 🇺🇸 `us` | [`nyc_taxi`](datasets/us/nyc_taxi/) | NYC Taxi & Limousine Commission - one row per taxi trip, monthly since 2009 |
 | 🇩🇪 `de` | [`opsd_solar`](datasets/de/opsd_solar/) | Open Power System Data - hourly German solar generation as measured by the four TSOs |
+
+[^1]: `ch` here means Chile, which is what the folder has always been called
+in this repository. It is worth knowing that `CH` is the ISO 3166 code for
+Switzerland - Chile is `CL`. The folder name is kept rather than quietly
+changed, because renaming it would break every path that refers to it; the
+mismatch is recorded here instead.
 
 ## Models
 
