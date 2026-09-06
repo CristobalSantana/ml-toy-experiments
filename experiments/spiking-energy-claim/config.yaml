@@ -1,0 +1,43 @@
+# Every reproducible parameter, frozen in CRITERIA.md on 2026-09-05.
+# run_all.py refuses to start if this file no longer matches.
+
+seed: 20260905
+
+splits:
+  train_end: "2017-12-31"
+  val_end: "2018-12-31"
+
+daylight_elevation_deg: 5.0   # below this the panels are effectively off
+
+network:
+  n_hidden: 64        # the same width for both architectures, so the
+                      # comparison is architecture and not capacity
+  beta: 0.9           # membrane leak per timestep
+  threshold: 1.0
+
+sweep:
+  n_steps: [1, 2, 4, 8, 16, 32]
+  encodings: ["direct", "rate"]
+  seeds: 3
+
+training:
+  epochs: 120
+  patience: 15        # a budget, not a tuned quantity: the best validation
+                      # state is restored, so a slower architecture is not
+                      # penalised for needing more epochs
+  batch: 256
+  lr: 0.005
+
+matching:
+  # what counts as "the same accuracy" for P3 and P5
+  rmse_tolerance: 0.02       # relative, against the dense network
+
+best_effort:
+  # Added after the pre-registered sweep showed the spiking network never
+  # reaching the dense network's accuracy at the frozen width. This gives it
+  # the most favourable setting tried - 8x the width and the longest T - to
+  # check that the gap is the architecture and not the budget.
+  # Disclosed as post-hoc in README.md; no prediction is scored on it.
+  n_hidden: 512
+  n_steps: 32
+  encoding: "direct"

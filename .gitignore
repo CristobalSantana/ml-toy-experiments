@@ -23,3 +23,8 @@ datasets/**/processed/
 # personal API tokens (e.g. TABPFN_TOKEN) - never committed
 .env
 **/.env
+
+# console transcripts of a run: useful locally, but they are wall-clock
+# noise and get rewritten on every rerun. The results themselves live in
+# experiments/*/outputs/ and are kept.
+**/run.log

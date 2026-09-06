@@ -1,0 +1,28 @@
+{
+  "mlp_rmse": 0.0077372663654387,
+  "mlp_ops_total": 960.0,
+  "mlp_ops_input": 896.0,
+  "mlp_ops_hidden": 64.0,
+  "smart_persistence_rmse": 0.025882069070154643,
+  "tolerance": 0.02,
+  "encodings": {
+    "direct": {
+      "matched": false,
+      "best_rmse": 0.013384830206632614
+    },
+    "rate": {
+      "matched": false,
+      "best_rmse": 0.04367195814847946
+    }
+  },
+  "best_effort": {
+    "n_hidden": 512,
+    "n_steps": 32,
+    "encoding": "direct",
+    "rmse": 0.012970051728188992,
+    "ops_total": 230949.047,
+    "spike_rate": 0.09601116943359375,
+    "ratio_rmse": 1.6763093210961977,
+    "ratio_ops": 240.57192395833331
+  }
+}

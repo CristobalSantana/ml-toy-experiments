@@ -1,0 +1,5 @@
+model,rmse,ops_total,note
+persistence,0.06386357194281353,0.0,reference
+smart_persistence,0.025882069070154643,0.0,reference
+ridge,0.011342056095600128,14.0,reference
+mlp,0.0077372663654387,960.0,dense control
