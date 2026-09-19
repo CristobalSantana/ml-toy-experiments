@@ -28,3 +28,4 @@ datasets/**/processed/
 # noise and get rewritten on every rerun. The results themselves live in
 # experiments/*/outputs/ and are kept.
 **/run.log
+**/run_all.log

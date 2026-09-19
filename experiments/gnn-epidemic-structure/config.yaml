@@ -1,0 +1,23 @@
+# Every reproducible parameter, frozen in CRITERIA.md on 2026-09-19.
+# run_all.py refuses to start if this file no longer matches.
+
+seed: 20260919
+
+task:
+  min_final_size: 0.10          # a major outbreak: at least 10% of nodes infected
+  train_share: 0.8              # of qualifying graphs; split by graph
+  val_share_of_train: 0.2       # of the training graphs, to pick the GNN's depth
+
+gnn:
+  n_hidden: 64
+  layers: [1, 2, 3, 4, 6, 8]
+  epochs: 60
+  lr: 0.003
+
+tabular:
+  n_hidden: 64
+  epochs: 40
+  batch: 512
+  lr: 0.003
+
+seeds: 3
