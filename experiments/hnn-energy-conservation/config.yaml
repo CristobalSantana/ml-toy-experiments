@@ -1,0 +1,24 @@
+# Every reproducible parameter, frozen in CRITERIA.md on 2026-09-19.
+# run_all.py refuses to start if this file no longer matches.
+
+seed: 20260919
+
+split:
+  n_train_trajectories: 140     # of 200; the other 60 are held out
+  energy_train_max: 0.5         # P5 only: train on H below this ...
+  energy_test_range: [0.5, 0.9] # ... evaluate on held-out states in here
+
+training:
+  n_states: 20000               # states sampled from training trajectories
+  epochs: 300
+  batch: 256
+  lr: 0.001
+  seeds: 3
+
+network:
+  n_hidden: 64
+
+rollout:
+  dt: 0.01                      # the generator's step
+  t_end: 100.0                  # the generator's horizon
+  n_initial_conditions: 30      # held-out trajectories rolled out

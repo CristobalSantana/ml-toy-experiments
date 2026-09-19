@@ -1,0 +1,30 @@
+{
+  "params": {
+    "n_trajectories": 200,
+    "t_end": 100.0,
+    "dt": 0.01,
+    "q_max": 3.141592653589793,
+    "p_max": 2.0,
+    "gamma_damped": 0.1,
+    "save_every": 10,
+    "seed": 20260919
+  },
+  "checks": {
+    "ideal": {
+      "max_energy_drift": 9.251381882791065e-10,
+      "period_measured": 6.382857142857143,
+      "period_exact": 6.382789679925336,
+      "period_rel_error": 1.0569505684707216e-05
+    },
+    "damped": {
+      "damping_law_max_error": 2.167086951843089e-05,
+      "damping_law_rms": 0.05210015172472019
+    }
+  },
+  "energy_range": [
+    -0.9940202407038035,
+    2.9373279163965336
+  ],
+  "n_libration": 119,
+  "n_rotation": 81
+}
