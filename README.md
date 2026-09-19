@@ -99,10 +99,32 @@ mismatch is recorded here instead.
 
 ## Models
 
-| Model | What it is |
-|---|---|
-| [`kan`](models/kan/) | Kolmogorov-Arnold Network - learnable spline functions on every edge instead of fixed activations |
-| [`mlp`](models/mlp/) | Standard feedforward baseline |
+Every architecture implemented in this repository, and where it lives. The
+two in [`models/`](models/) are shared between experiments; the rest were
+written for one experiment and live next to the pre-registration that
+constrains them.
+
+| Model | What it is | Where |
+|---|---|---|
+| Kolmogorov-Arnold Network | learnable spline functions on every edge instead of fixed activations | [`models/kan/`](models/kan/) |
+| MLP | standard feedforward baseline, reused as the dense control in several experiments | [`models/mlp/`](models/mlp/) |
+| Echo state network | reservoir computing: fixed random recurrent weights, only the linear readout is trained | [`solar-forecast-skill/models.py`](experiments/solar-forecast-skill/models.py) |
+| Hyperdimensional classifier | records as products of random 10,000-dimensional vectors, classes as their sums; training is one pass of addition | [`hdc-vs-boosting/hdc.py`](experiments/hdc-vs-boosting/hdc.py) |
+| Spiking network | leaky integrate-and-fire neurons trained with a surrogate gradient, with a measured operation counter | [`spiking-energy-claim/snn.py`](experiments/spiking-energy-claim/snn.py) |
+| Hamiltonian Neural Network | learns a scalar `H_θ` and derives the vector field as its symplectic gradient, so the field conserves `H_θ` by construction | [`hnn-energy-conservation/models.py`](experiments/hnn-energy-conservation/models.py) |
+| Message-passing GNN | `h' = ReLU(W₁h + W₂·mean of h over neighbours)`, stacked `L` times, in plain PyTorch | [`gnn-epidemic-structure/graph.py`](experiments/gnn-epidemic-structure/graph.py) |
+
+Methods that wrap or test a model rather than being one:
+
+| Method | What it is | Where |
+|---|---|---|
+| Sparse identification (SINDy / PDE-FIND) | sequentially thresholded least squares over a library of candidate terms, recovering a differential equation from data | [`symbolic-regression-pde/sindy.py`](experiments/symbolic-regression-pde/sindy.py) |
+| Split conformal prediction | distribution-free prediction intervals with the finite-sample `⌈(n+1)(1−α)⌉/n` correction | [`conformal-under-drift/conformal.py`](experiments/conformal-under-drift/conformal.py) |
+| Classifier two-sample test | a drift detector that tries to tell two samples apart, scored by MCC against the overlap of their distributions | [`drift-detector-overlap/detector.py`](experiments/drift-detector-overlap/detector.py) |
+
+Off-the-shelf models used as baselines and never reimplemented: gradient
+boosting (scikit-learn's `HistGradientBoosting`), CatBoost, TabPFN v2, ridge
+and logistic regression.
 
 ## Setup
 
