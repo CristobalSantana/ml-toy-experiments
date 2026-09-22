@@ -134,5 +134,22 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-Then `cd` into an experiment folder and run its `run.py` - see that
+Then `cd` into an experiment folder and run its `run_all.py` - the oldest
+experiment, `kan_vs_mlp_battery_diffusion`, still calls its entry point
+`run.py`. Each one checks its `config.yaml` against the frozen
+pre-registration and runs its implementation checks before anything else, so
+a broken setup fails loudly rather than producing a plausible number. See the
 experiment's own `README.md` for expected runtime and what it produces.
+
+## Licence
+
+MIT - see [`LICENSE`](LICENSE). Use, modify and redistribute freely; the
+public datasets keep their own licences, documented in each
+`datasets/<country>/<name>/README.md`.
+
+## Where these come from
+
+Several of these experiments began as figures or claims in
+[my newsletter](https://cristobalsantana.substack.com), where the writing
+explains why the question was worth asking. The repository is the part that
+has to survive being run by somebody else.
