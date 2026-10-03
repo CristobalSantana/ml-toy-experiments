@@ -1,0 +1,29 @@
+# Every reproducible parameter, frozen in CRITERIA.md on 2026-10-03.
+# run_all.py refuses to start if this file no longer matches.
+
+seed: 20261003
+
+data:
+  viscosities: [0.1, 0.03, 0.01]
+  n_train: 1000                 # samples 0..999; 1000..1199 held out
+  train_resolution: 64
+  high_resolution: 256          # P5: the FNO trained here as well
+  eval_resolutions: [64, 128, 256, 512]
+
+training:
+  epochs: 300
+  batch: 20
+  lr: 0.001
+  lr_halve_every: 60            # epochs
+  weight_decay: 0.0001
+  seeds: 3
+
+fno:
+  width: 32
+  modes: 16
+  layers: 4
+
+cnn:
+  channels: 63
+  kernel: 5
+  dilations: [1, 2, 4, 8, 16, 4, 1]

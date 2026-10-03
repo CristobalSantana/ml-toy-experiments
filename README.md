@@ -28,11 +28,11 @@ experiments/  each experiment combines a data source + one or more models
   country code (`ch`, `us`, `de`), since public data is national: its
   source, units and administrative concepts only make sense within one
   country's system.
-- **`models/<name>/`** - the implementation and a short `README.md`. Only
-  for models reused across experiments; one written for a single experiment
-  lives in that experiment's folder, next to the pre-registration that
-  constrains it (`hdc.py`, `sindy.py`, `snn.py`, and the echo state network
-  inside `solar-forecast-skill/models.py`).
+- **`models/<name>/`** - the implementation and a short `README.md`. The
+  KAN and the MLP it was compared against live here; every architecture
+  since was written for one experiment and lives in that experiment's
+  folder, next to the pre-registration that fixed its size.
+  [`models/README.md`](models/README.md) indexes all of them.
 - **`experiments/<name>/`** - `run_all.py` (single entry point, runnable end
   to end; the oldest experiment still calls it `run.py`), `config.yaml`
   (every reproducible parameter - constants, seeds, sizes), a `README.md`
@@ -57,6 +57,7 @@ experiments/  each experiment combines a data source + one or more models
 | [`hdc-vs-boosting`](experiments/hdc-vs-boosting/) | Hyperdimensional computing has no loss function: training is one pass of addition. It is claimed to learn from very few examples, to tolerate corruption of its own representation, and to be cheap. What do those three buy against a gradient-boosted tree? | The first claim is true and stops mattering: HDC leads up to about 3,000 rows, then plateaus at AUC 0.56 while the booster climbs to 0.64 - thirty times more data buys HDC 0.001. The second is spectacularly true: **switching off 80% of its 10,000 dimensions leaves the AUC identical to six decimal places.** The third is false - it fits sixteen times slower and stores 730,000 numbers against 12,188, and that 730,000 is the same whether it saw 100 rows or 300,000. |
 | [`hnn-energy-conservation`](experiments/hnn-energy-conservation/) | A Hamiltonian Neural Network learns a scalar and derives the vector field from it, so whatever it learns is conserved by construction. What does building a conservation law into the architecture buy - and what does it cost on a system with friction, where the law is false? | Trained only on dq/dt and dp/dt, never shown an energy, the network recovered the pendulum's `H` to a slope of 1.0001 and R² 0.99999. It fits the field slightly *worse* than an equal-size MLP and rolls out far *better*: 33× less energy drift over 100 time units, and 16-58× less state error when started at energies above anything in training. Add friction and its error floor rises 11× while the MLP's does not move - no scalar can generate a field that loses energy. All five predictions held; the first version failed its own control because a rotating pendulum's angle is unbounded, which is what the control was for. |
 | [`gnn-epidemic-structure`](experiments/gnn-epidemic-structure/) | A graph neural network learns from structure a per-node model cannot see. On a task that is about structure - who catches a disease spreading over a network - how much of its advantage survives against features a person would compute by hand? | Almost none. The GNN beat an MLP on five hand-computed features by 0.001 AUC, one message-passing layer scored as well as eight, and its output is rank-correlated +0.95 with degree - the one feature it was handed as input. Infection in an SIR outbreak turns out to be a degree problem: the empirical ceiling for any degree-only predictor is 0.660 and every model that could use degree reached 0.66-0.67. Three of five pre-registered predictions failed for that single reason, including the bet on which feature was the obvious one. Under structural drift the GNN lost the most. |
+| [`fno-super-resolution`](experiments/fno-super-resolution/) | A Fourier Neural Operator keeps its weights on wavenumbers, so one trained network runs on any grid. Trained on a coarse grid, does it add real detail on a fine one - "zero-shot super-resolution" - or only interpolate? | Real detail, against the pre-registered prediction. Trained on 64 points and run on 256, it draws fronts narrower than one coarse cell with 2.3% error, where interpolating its own answer gives 9.6% and interpolating the exact one 9.5%. On the training grid a CNN of the same size is as accurate; on any other grid it is useless. |
 | [`btc-02-strategy-search`](experiments/btc-02-strategy-search/) | btc-01's best parameter set beat buy-and-hold in development and collapsed out of sample. How much of that is the search itself? | Run the same 1,412-strategy search on bars shuffled into a random order, where no timing rule can work by construction, and the best one still ends with 1.41x buy-and-hold's equity - reaching real Bitcoin's 4.54x in **7% of surrogates**. Preserve volatility clustering instead and it happens 28% of the time. The rank correlation between a strategy's backtest and the two years that follow is +0.11, and the median strategy returned 1.5% while simply holding returned 49.1%. |
 | [`btc-01-rsi-divergence`](experiments/btc-01-rsi-divergence/) | Does RSI divergence, one of the most widely taught chart patterns, beat simply holding BTC after costs? | No, on both timeframes tested. Held out, it *lost* 33% (daily) and 24% (hourly) over a period when BTC rose 49%. The useful part is why it looked like it worked: the best of 18 parameter sets beat buy-and-hold in development and collapsed out of sample. |
 
@@ -77,6 +78,7 @@ equation, so every experiment has an exact ground truth to measure against.
 
 | Generator | Equation |
 |---|---|
+| [`burgers_1d`](generators/burgers_1d/) | Viscous Burgers' equation `u_t + u u_x = ν u_xx` at three viscosities, from band-limited starts, checked against the exact Cole-Hopf solution |
 | [`diffusion_1d`](generators/diffusion_1d/) | 1D diffusion / heat equation, framed as lithium-ion battery charging |
 | [`hamiltonian_pendulum`](generators/hamiltonian_pendulum/) | The pendulum `H = p²/2 − cos q`, ideal and damped, with energy conservation, the exact elliptic-integral period and the damping law all checked on every run |
 | [`sir_on_graph`](generators/sir_on_graph/) | SIR epidemics on Erdős–Rényi and Barabási–Albert graphs, with the epidemic threshold checked against Newman's formula |
@@ -100,19 +102,20 @@ mismatch is recorded here instead.
 ## Models
 
 Every architecture implemented in this repository, and where it lives. The
-two in [`models/`](models/) are shared between experiments; the rest were
-written for one experiment and live next to the pre-registration that
-constrains them.
+two in [`models/`](models/) came with the first experiment; every later one
+was written for one experiment and lives next to the pre-registration that
+constrains it.
 
 | Model | What it is | Where |
 |---|---|---|
 | Kolmogorov-Arnold Network | learnable spline functions on every edge instead of fixed activations | [`models/kan/`](models/kan/) |
-| MLP | standard feedforward baseline, reused as the dense control in several experiments | [`models/mlp/`](models/mlp/) |
+| MLP | `tanh` feedforward network, the parameter-matched baseline for the KAN | [`models/mlp/`](models/mlp/) |
 | Echo state network | reservoir computing: fixed random recurrent weights, only the linear readout is trained | [`solar-forecast-skill/models.py`](experiments/solar-forecast-skill/models.py) |
 | Hyperdimensional classifier | records as products of random 10,000-dimensional vectors, classes as their sums; training is one pass of addition | [`hdc-vs-boosting/hdc.py`](experiments/hdc-vs-boosting/hdc.py) |
 | Spiking network | leaky integrate-and-fire neurons trained with a surrogate gradient, with a measured operation counter | [`spiking-energy-claim/snn.py`](experiments/spiking-energy-claim/snn.py) |
 | Hamiltonian Neural Network | learns a scalar `H_θ` and derives the vector field as its symplectic gradient, so the field conserves `H_θ` by construction | [`hnn-energy-conservation/models.py`](experiments/hnn-energy-conservation/models.py) |
 | Message-passing GNN | `h' = ReLU(W₁h + W₂·mean of h over neighbours)`, stacked `L` times, in plain PyTorch | [`gnn-epidemic-structure/graph.py`](experiments/gnn-epidemic-structure/graph.py) |
+| Fourier Neural Operator | spectral convolution: learned weights on the lowest Fourier modes, so one trained network runs on any grid | [`fno-super-resolution/models.py`](experiments/fno-super-resolution/models.py) |
 
 Methods that wrap or test a model rather than being one:
 

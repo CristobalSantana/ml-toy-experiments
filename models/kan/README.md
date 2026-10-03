@@ -25,3 +25,5 @@ activation function sits between KAN layers; the nonlinearity already lives
 on every edge.
 
 Reference: Liu et al., *"KAN: Kolmogorov-Arnold Networks"* (2024).
+
+Used by [`kan_vs_mlp_battery_diffusion`](../../experiments/kan_vs_mlp_battery_diffusion/).
