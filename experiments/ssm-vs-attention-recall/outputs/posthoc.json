@@ -1,0 +1,67 @@
+{
+  "guess_level": {
+    "4": 0.252125,
+    "8": 0.12765625,
+    "16": 0.0664140625,
+    "32": 0.035009765625,
+    "64": 0.01943115234375
+  },
+  "by_model": {
+    "attention": {
+      "learned": 3,
+      "runs": 3,
+      "k90_of_learned": [
+        64.0,
+        64.0,
+        64.0
+      ],
+      "recalled_at_64_of_learned": [
+        64.0,
+        64.0,
+        64.0
+      ]
+    },
+    "lti-32": {
+      "learned": 0,
+      "runs": 3,
+      "k90_of_learned": [],
+      "recalled_at_64_of_learned": []
+    },
+    "ssm-16": {
+      "learned": 1,
+      "runs": 3,
+      "k90_of_learned": [
+        38.5
+      ],
+      "recalled_at_64_of_learned": [
+        47.4
+      ]
+    },
+    "ssm-32": {
+      "learned": 2,
+      "runs": 3,
+      "k90_of_learned": [
+        55.0,
+        59.6
+      ],
+      "recalled_at_64_of_learned": [
+        55.9,
+        56.8
+      ]
+    },
+    "ssm-4": {
+      "learned": 0,
+      "runs": 3,
+      "k90_of_learned": [],
+      "recalled_at_64_of_learned": []
+    },
+    "ssm-8": {
+      "learned": 0,
+      "runs": 3,
+      "k90_of_learned": [],
+      "recalled_at_64_of_learned": []
+    }
+  },
+  "n_selective_runs": 12,
+  "n_selective_learned": 3
+}

@@ -1,0 +1,28 @@
+# Every reproducible parameter, frozen in CRITERIA.md on 2026-10-03.
+# run_all.py refuses to start if this file no longer matches.
+
+seed: 20261003
+
+data:
+  n_keys: 256
+  n_values: 256
+  pair_counts: [4, 8, 16, 32, 64]
+
+model:
+  d_model: 64
+  n_layers: 2
+  n_heads: 4                    # attention: 4 heads of 16
+
+ssm:
+  d_states: [4, 8, 16, 32]      # selective SSM: state 128 x N per layer
+  lti_d_state: 32               # the ablation, selection switched off
+
+training:
+  steps: 7500                   # one pair count per step, in rotation
+  batch: 64
+  lr: 0.001
+  warmup: 300
+  weight_decay: 0.1
+  grad_clip: 1.0
+  eval_every: 750               # curve only; scoring uses the final model
+  seeds: 3

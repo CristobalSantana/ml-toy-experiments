@@ -21,6 +21,8 @@ This is the index of all of them.
 | Hamiltonian Neural Network | learns a scalar `H_θ` and derives the vector field as its symplectic gradient, so the field conserves `H_θ` by construction | [`hnn-energy-conservation/models.py`](../experiments/hnn-energy-conservation/models.py) |
 | Message-passing GNN | `h' = ReLU(W₁h + W₂·mean of h over neighbours)`, stacked `L` times, in plain PyTorch | [`gnn-epidemic-structure/graph.py`](../experiments/gnn-epidemic-structure/graph.py) |
 | Fourier Neural Operator | spectral convolution: weights on the lowest Fourier modes, so one trained network runs on any grid | [`fno-super-resolution/models.py`](../experiments/fno-super-resolution/models.py) |
+| Transformer | causal softmax attention with rotary positions; keeps every token it has read | [`ssm-vs-attention-recall/models.py`](../experiments/ssm-vs-attention-recall/models.py) |
+| Selective state-space model | Mamba-2 style: a recurrence over a fixed-size state whose write, read and decay depend on the input; trained with the chunked SSD algorithm, checked against the explicit recurrence. With selection switched off it is the LTI ablation | [`ssm-vs-attention-recall/models.py`](../experiments/ssm-vs-attention-recall/models.py) |
 
 Dense controls that an experiment sizes to its own pre-registration - the
 MLPs in the HNN, spiking and GNN experiments, the CNN in the FNO one - are

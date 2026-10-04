@@ -1,0 +1,71 @@
+{
+  "P1": {
+    "accuracy_at_4": {
+      "attention": 1.0,
+      "ssm-32": 1.0
+    },
+    "passed": true
+  },
+  "P2": {
+    "attention_accuracy": {
+      "4": 1.0,
+      "8": 1.0,
+      "16": 1.0,
+      "32": 1.0,
+      "64": 1.0
+    },
+    "passed": true
+  },
+  "P3": {
+    "accuracy_at_64": {
+      "ssm-4": 0.025703125,
+      "ssm-8": 0.02896875,
+      "ssm-16": 0.04684375,
+      "ssm-32": 0.87525
+    },
+    "passed": true
+  },
+  "P4": {
+    "median_k90": {
+      "4": {
+        "value": 4.0,
+        "censored": "below"
+      },
+      "8": {
+        "value": 4.0,
+        "censored": "below"
+      },
+      "16": {
+        "value": 4.0,
+        "censored": "below"
+      },
+      "32": {
+        "value": 54.9644515692297,
+        "censored": ""
+      }
+    },
+    "uncensored_sizes": 1,
+    "slope": NaN,
+    "passed": false
+  },
+  "P5": {
+    "lti_k90": {
+      "value": 4.0,
+      "censored": "below"
+    },
+    "selective_k90": {
+      "value": 54.9644515692297,
+      "censored": ""
+    },
+    "passed": true
+  },
+  "params": {
+    "attention": 166144,
+    "ssm-32": 193456,
+    "ssm-4": 185728,
+    "ssm-8": 186832,
+    "ssm-16": 189040,
+    "lti-32": 185120
+  },
+  "minutes": 382.3573096394539
+}
